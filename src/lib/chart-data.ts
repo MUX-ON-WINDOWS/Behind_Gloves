@@ -76,3 +76,82 @@ export const performanceSummary = {
   cleanSheets: 3,
   savePercentage: 85.4,
 };
+
+// New data for matches and scoreboard
+export const lastMatch = {
+  homeTeam: "FC United",
+  homeScore: 2,
+  awayTeam: "City FC",
+  awayScore: 0,
+  date: "2025-03-28",
+  venue: "United Stadium",
+  cleanSheet: true,
+  saves: 6,
+};
+
+export const upcomingMatch = {
+  homeTeam: "FC United",
+  awayTeam: "Rovers FC",
+  date: "2025-04-10",
+  time: "19:45",
+  venue: "United Stadium",
+  competition: "Premier League",
+};
+
+export const teamScoreboard = [
+  { 
+    position: 1, 
+    team: "City FC", 
+    played: 32, 
+    won: 24, 
+    drawn: 5, 
+    lost: 3, 
+    goalsFor: 68, 
+    goalsAgainst: 21,
+    points: 77
+  },
+  { 
+    position: 2, 
+    team: "FC United", 
+    played: 32, 
+    won: 22, 
+    drawn: 6, 
+    lost: 4, 
+    goalsFor: 65, 
+    goalsAgainst: 28,
+    points: 72
+  },
+  { 
+    position: 3, 
+    team: "Athletic FC", 
+    played: 32, 
+    won: 19, 
+    drawn: 8, 
+    lost: 5, 
+    goalsFor: 59, 
+    goalsAgainst: 32,
+    points: 65
+  },
+  { 
+    position: 4, 
+    team: "Rovers FC", 
+    played: 32, 
+    won: 18, 
+    drawn: 7, 
+    lost: 7, 
+    goalsFor: 52, 
+    goalsAgainst: 34,
+    points: 61
+  },
+  { 
+    position: 5, 
+    team: "United City", 
+    played: 32, 
+    won: 16, 
+    drawn: 10, 
+    lost: 6, 
+    goalsFor: 47, 
+    goalsAgainst: 29,
+    points: 58
+  }
+];

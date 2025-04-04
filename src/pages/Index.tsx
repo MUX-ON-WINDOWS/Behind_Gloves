@@ -3,6 +3,9 @@ import { Layout } from "@/components/Layout";
 import { SavesChart } from "@/components/SavesChart";
 import { GoalsConcededChart } from "@/components/GoalsConcededChart";
 import { PerformanceSummary } from "@/components/PerformanceSummary";
+import { LastMatch } from "@/components/LastMatch";
+import { UpcomingMatch } from "@/components/UpcomingMatch";
+import { TeamScoreboard } from "@/components/TeamScoreboard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -19,10 +22,16 @@ const Index = () => {
         
         <PerformanceSummary />
 
+        <div className="grid gap-6 md:grid-cols-2">
+          <LastMatch />
+          <UpcomingMatch />
+        </div>
+
         <Tabs defaultValue="charts" className="w-full">
           <TabsList className="mb-4">
             <TabsTrigger value="charts">Charts</TabsTrigger>
             <TabsTrigger value="analysis">Analysis</TabsTrigger>
+            <TabsTrigger value="scoreboard">Scoreboard</TabsTrigger>
           </TabsList>
           
           <TabsContent value="charts">
@@ -62,6 +71,10 @@ const Index = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+          
+          <TabsContent value="scoreboard">
+            <TeamScoreboard />
           </TabsContent>
         </Tabs>
 
