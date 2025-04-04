@@ -6,6 +6,7 @@ import { PerformanceSummary } from "@/components/PerformanceSummary";
 import { LastMatch } from "@/components/LastMatch";
 import { UpcomingMatch } from "@/components/UpcomingMatch";
 import { TeamScoreboard } from "@/components/TeamScoreboard";
+import { MatchLogComponent } from "@/components/MatchLog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -32,6 +33,7 @@ const Index = () => {
             <TabsTrigger value="charts">Charts</TabsTrigger>
             <TabsTrigger value="analysis">Analysis</TabsTrigger>
             <TabsTrigger value="scoreboard">Scoreboard</TabsTrigger>
+            <TabsTrigger value="matchlog">Match Log</TabsTrigger>
           </TabsList>
           
           <TabsContent value="charts">
@@ -75,6 +77,10 @@ const Index = () => {
           
           <TabsContent value="scoreboard">
             <TeamScoreboard />
+          </TabsContent>
+          
+          <TabsContent value="matchlog">
+            <MatchLogComponent />
           </TabsContent>
         </Tabs>
 

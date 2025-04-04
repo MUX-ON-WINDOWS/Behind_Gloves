@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { lastMatch as initialLastMatch } from "@/lib/chart-data";
+import { useDataStore } from "@/lib/data-store";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -9,7 +9,7 @@ import { ClipboardCheck, Save, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export const LastMatch = () => {
-  const [lastMatch, setLastMatch] = useState(initialLastMatch);
+  const { lastMatch, setLastMatch, recalculatePerformanceSummary } = useDataStore();
   const { homeTeam, homeScore, awayTeam, awayScore, date, venue, cleanSheet, saves } = lastMatch;
   const matchResult = homeScore > awayScore ? "win" : homeScore < awayScore ? "loss" : "draw";
   
@@ -29,6 +29,8 @@ export const LastMatch = () => {
       saves: newSaves,
       cleanSheet: updatedCleanSheet
     });
+    
+    recalculatePerformanceSummary();
     
     toast({
       title: "Match Result Updated",
