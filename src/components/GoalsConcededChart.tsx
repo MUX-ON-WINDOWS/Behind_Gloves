@@ -1,11 +1,12 @@
 
 import { useTheme } from "@/hooks/useTheme";
-import { goalsConcededData } from "@/lib/chart-data";
+import { useDataStore } from "@/hooks/useDataStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 export const GoalsConcededChart = () => {
   const { theme } = useTheme();
+  const { goalsConcededData } = useDataStore();
   
   const textColor = theme === "dark" ? "#f8fafc" : "#0f172a";
   const gridColor = theme === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)";
