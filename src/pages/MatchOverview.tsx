@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -122,7 +121,19 @@ const MatchOverview = () => {
   };
   
   const handleAddMatch = (data: MatchFormValues) => {
-    addMatchLog(data);
+    const newMatchData: Omit<MatchLog, "id"> = {
+      date: data.date,
+      homeTeam: data.homeTeam,
+      awayTeam: data.awayTeam,
+      homeScore: data.homeScore,
+      awayScore: data.awayScore,
+      venue: data.venue,
+      saves: data.saves,
+      cleanSheet: data.cleanSheet,
+      notes: data.notes || ""
+    };
+    
+    addMatchLog(newMatchData);
     recalculatePerformanceSummary();
     toast({
       title: "Match Added",
@@ -133,7 +144,19 @@ const MatchOverview = () => {
   
   const handleUpdateMatch = (data: MatchFormValues) => {
     if (selectedMatchId) {
-      updateMatchLog(selectedMatchId, data);
+      const updatedMatchData: Partial<MatchLog> = {
+        date: data.date,
+        homeTeam: data.homeTeam,
+        awayTeam: data.awayTeam,
+        homeScore: data.homeScore,
+        awayScore: data.awayScore,
+        venue: data.venue,
+        saves: data.saves,
+        cleanSheet: data.cleanSheet,
+        notes: data.notes || ""
+      };
+      
+      updateMatchLog(selectedMatchId, updatedMatchData);
       recalculatePerformanceSummary();
       toast({
         title: "Match Updated",
@@ -155,7 +178,6 @@ const MatchOverview = () => {
     }
   };
   
-  // Sort matches by date (most recent first)
   const sortedMatches = [...matchLogs].sort((a, b) => 
     new Date(b.date).getTime() - new Date(a.date).getTime()
   );
@@ -269,7 +291,6 @@ const MatchOverview = () => {
           </Table>
         </div>
 
-        {/* Add Match Dialog */}
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
@@ -416,7 +437,6 @@ const MatchOverview = () => {
           </DialogContent>
         </Dialog>
         
-        {/* Edit Match Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
@@ -563,7 +583,6 @@ const MatchOverview = () => {
           </DialogContent>
         </Dialog>
         
-        {/* Delete Confirmation Dialog */}
         <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <DialogContent>
             <DialogHeader>
