@@ -29,6 +29,11 @@ export const DataStoreContext = createContext<DataStoreContextType | undefined>(
 // Provider component
 export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
   // Initialize state from localStorage or defaults
+  const [matchLogs, setMatchLogs] = useState<MatchLog[]>(() => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.MATCH_LOGS);
+    return saved ? JSON.parse(saved) : generateInitialMatchLogs();
+  });
+  
   const [goalsConcededData, setGoalsConcededData] = useState<GoalsConcededDataPoint[]>(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.GOALS_CONCEDED);
     return saved ? JSON.parse(saved) : initialGoalsConcededData;
@@ -64,12 +69,11 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
     return saved ? JSON.parse(saved) : initialTeamScoreboard;
   });
   
-  const [matchLogs, setMatchLogs] = useState<MatchLog[]>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.MATCH_LOGS);
-    return saved ? JSON.parse(saved) : generateInitialMatchLogs();
-  });
-  
   // Save to localStorage whenever state changes
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEYS.MATCH_LOGS, JSON.stringify(matchLogs));
+  }, [matchLogs]);
+  
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEYS.GOALS_CONCEDED, JSON.stringify(goalsConcededData));
   }, [goalsConcededData]);
@@ -98,8 +102,42 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem(LOCAL_STORAGE_KEYS.TEAM_SCOREBOARD, JSON.stringify(teamScoreboard));
   }, [teamScoreboard]);
   
+  // Generate statistics from match logs
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEYS.MATCH_LOGS, JSON.stringify(matchLogs));
+    if (matchLogs.length > 0) {
+      // Update goals conceded and saves made data
+      const last6Matches = [...matchLogs]
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 6)
+        .reverse();
+      
+      const newGoalsConceded = last6Matches.map((match, index) => {
+        const isHomeGame = match.homeTeam === "FC United";
+        const goalsAgainst = isHomeGame ? match.awayScore : match.homeScore;
+        // Format date to show just month/day
+        const matchDate = new Date(match.date);
+        const formattedDate = `${matchDate.getMonth() + 1}/${matchDate.getDate()}`;
+        
+        return {
+          name: formattedDate,
+          goals: goalsAgainst
+        };
+      });
+      
+      const newSavesMade = last6Matches.map((match, index) => {
+        // Format date to show just month/day
+        const matchDate = new Date(match.date);
+        const formattedDate = `${matchDate.getMonth() + 1}/${matchDate.getDate()}`;
+        
+        return {
+          name: formattedDate,
+          saves: match.saves
+        };
+      });
+      
+      setGoalsConcededData(newGoalsConceded);
+      setSavesMadeData(newSavesMade);
+    }
   }, [matchLogs]);
   
   // Helper functions for match logs
@@ -127,17 +165,33 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
     let totalSaves = 0;
     let totalGoalsConceded = 0;
     let totalCleanSheets = 0;
+    let fcUnitedWins = 0;
+    let fcUnitedDraws = 0;
+    let fcUnitedLosses = 0;
     
     matchLogs.forEach(match => {
       totalSaves += match.saves;
       
-      // Determine goals conceded based on whether FC United was home or away
-      if (match.homeTeam === 'FC United') {
+      const isHomeGame = match.homeTeam === 'FC United';
+      const fcUnitedScore = isHomeGame ? match.homeScore : match.awayScore;
+      const opponentScore = isHomeGame ? match.awayScore : match.homeScore;
+      
+      // Determine goals conceded 
+      if (isHomeGame) {
         totalGoalsConceded += match.awayScore;
         if (match.awayScore === 0) totalCleanSheets++;
       } else {
         totalGoalsConceded += match.homeScore;
         if (match.homeScore === 0) totalCleanSheets++;
+      }
+      
+      // Determine match result
+      if (fcUnitedScore > opponentScore) {
+        fcUnitedWins++;
+      } else if (fcUnitedScore === opponentScore) {
+        fcUnitedDraws++;
+      } else {
+        fcUnitedLosses++;
       }
     });
     
@@ -155,6 +209,41 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
     };
     
     setPerformanceSummary(newSummary);
+    
+    // Update team scoreboard
+    const updatedTeamScoreboard = [...teamScoreboard];
+    const fcUnitedIndex = updatedTeamScoreboard.findIndex(team => team.team === 'FC United');
+    
+    if (fcUnitedIndex !== -1) {
+      updatedTeamScoreboard[fcUnitedIndex] = {
+        ...updatedTeamScoreboard[fcUnitedIndex],
+        played: totalMatches,
+        won: fcUnitedWins,
+        drawn: fcUnitedDraws,
+        lost: fcUnitedLosses,
+        goalsFor: matchLogs.reduce((total, match) => {
+          return total + (match.homeTeam === 'FC United' ? match.homeScore : match.awayScore);
+        }, 0),
+        goalsAgainst: totalGoalsConceded,
+        points: fcUnitedWins * 3 + fcUnitedDraws
+      };
+      
+      // Resort teams by points
+      updatedTeamScoreboard.sort((a, b) => {
+        if (b.points !== a.points) return b.points - a.points;
+        // Goal difference as tiebreaker
+        const aGD = a.goalsFor - a.goalsAgainst;
+        const bGD = b.goalsFor - b.goalsAgainst;
+        return bGD - aGD;
+      });
+      
+      // Update positions
+      updatedTeamScoreboard.forEach((team, index) => {
+        team.position = index + 1;
+      });
+      
+      setTeamScoreboard(updatedTeamScoreboard);
+    }
   };
   
   return (

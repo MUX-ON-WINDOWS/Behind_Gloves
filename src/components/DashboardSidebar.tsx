@@ -20,6 +20,11 @@ const navItems = [
     path: "/"
   },
   {
+    title: "Match Overview",
+    icon: Calendar,
+    path: "/match-overview"
+  },
+  {
     title: "Performance",
     icon: LineChart,
     path: "/performance"
@@ -28,11 +33,6 @@ const navItems = [
     title: "Shot Map",
     icon: PieChart,
     path: "/shot-map"
-  },
-  {
-    title: "Match Overview",
-    icon: Calendar,
-    path: "/match-overview"
   },
   {
     title: "Profile",
@@ -62,10 +62,11 @@ export const DashboardSidebar = ({ className }: { className?: string }) => {
             const isActive = location.pathname === item.path;
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild className={isActive ? "text-primary" : ""}>
+                <SidebarMenuButton asChild className={isActive ? "text-primary font-semibold" : ""}>
                   <Link to={item.path} className="flex items-center gap-3 px-3 py-2">
                     <item.icon size={18} />
                     <span>{item.title}</span>
+                    {item.title === "Match Overview" && <span className="ml-auto text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">Main</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

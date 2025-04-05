@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Edit, Trash2, Plus, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -44,12 +44,43 @@ const matchFormSchema = z.object({
 type MatchFormValues = z.infer<typeof matchFormSchema>;
 
 const MatchOverview = () => {
-  const { matchLogs, addMatchLog, updateMatchLog, deleteMatchLog, recalculatePerformanceSummary } = useDataStore();
+  const { 
+    matchLogs, 
+    addMatchLog, 
+    updateMatchLog, 
+    deleteMatchLog, 
+    recalculatePerformanceSummary,
+    setLastMatch,
+    lastMatch
+  } = useDataStore();
+  
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
   const { toast } = useToast();
+  
+  useEffect(() => {
+    if (matchLogs.length > 0) {
+      const sortedMatches = [...matchLogs].sort((a, b) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      
+      const recentMatch = sortedMatches[0];
+      const isHomeGame = recentMatch.homeTeam === "FC United";
+      
+      setLastMatch({
+        homeTeam: recentMatch.homeTeam,
+        homeScore: recentMatch.homeScore,
+        awayTeam: recentMatch.awayTeam,
+        awayScore: recentMatch.awayScore,
+        date: recentMatch.date,
+        venue: recentMatch.venue,
+        cleanSheet: recentMatch.cleanSheet,
+        saves: recentMatch.saves
+      });
+    }
+  }, [matchLogs, setLastMatch]);
   
   const addForm = useForm<MatchFormValues>({
     resolver: zodResolver(matchFormSchema),
@@ -137,7 +168,7 @@ const MatchOverview = () => {
     recalculatePerformanceSummary();
     toast({
       title: "Match Added",
-      description: "New match has been added to your records."
+      description: "New match has been added to your records and all stats updated."
     });
     setIsAddDialogOpen(false);
   };
@@ -160,7 +191,7 @@ const MatchOverview = () => {
       recalculatePerformanceSummary();
       toast({
         title: "Match Updated",
-        description: "Match details have been successfully updated."
+        description: "Match details have been successfully updated and all stats recalculated."
       });
       setIsEditDialogOpen(false);
     }
@@ -172,7 +203,7 @@ const MatchOverview = () => {
       recalculatePerformanceSummary();
       toast({
         title: "Match Deleted",
-        description: "Match has been removed from your records."
+        description: "Match has been removed and all statistics have been updated."
       });
       setIsDeleteDialogOpen(false);
     }
@@ -191,7 +222,7 @@ const MatchOverview = () => {
           <div>
             <h2 className="text-3xl font-bold tracking-tight mb-2">Match Overview</h2>
             <p className="text-muted-foreground">
-              View and manage all your match records
+              Central hub for all match data management
             </p>
           </div>
           <Button onClick={openAddDialog} className="gap-1">
@@ -202,7 +233,7 @@ const MatchOverview = () => {
 
         <div className="rounded-lg border">
           <Table>
-            <TableCaption>A comprehensive list of all match records</TableCaption>
+            <TableCaption>All match records will automatically update statistics across the application</TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead>Date</TableHead>
@@ -295,6 +326,9 @@ const MatchOverview = () => {
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Add New Match</DialogTitle>
+              <DialogDescription>
+                Adding a match will automatically update all statistics
+              </DialogDescription>
             </DialogHeader>
             
             <Form {...addForm}>
@@ -441,6 +475,9 @@ const MatchOverview = () => {
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Edit Match</DialogTitle>
+              <DialogDescription>
+                All statistics will be automatically updated when you save changes
+              </DialogDescription>
             </DialogHeader>
             
             <Form {...editForm}>
@@ -587,6 +624,9 @@ const MatchOverview = () => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Delete Match</DialogTitle>
+              <DialogDescription>
+                This will remove the match and update all related statistics
+              </DialogDescription>
             </DialogHeader>
             
             {selectedMatch && (
