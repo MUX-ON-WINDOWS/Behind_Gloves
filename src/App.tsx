@@ -10,6 +10,7 @@ import Performance from "./pages/Performance";
 import ShotMap from "./pages/ShotMap";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import MatchOverview from "./pages/MatchOverview";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/shot-map" element={<ShotMap />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/match-overview" element={<MatchOverview />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

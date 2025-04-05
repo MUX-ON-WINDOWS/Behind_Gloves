@@ -9,16 +9,29 @@ import { TeamScoreboard } from "@/components/TeamScoreboard";
 import { MatchLogComponent } from "@/components/MatchLog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { Calendar, BarChart, ClipboardCheck } from "lucide-react";
+import { useDataStore } from "@/lib/data-store";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { performanceSummary } = useDataStore();
+  
   return (
     <Layout>
       <div className="space-y-6">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight mb-4">Goalkeeper Dashboard</h2>
-          <p className="text-muted-foreground">
-            Analyze your goalkeeper's performance with detailed metrics and visualizations.
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight mb-2">Goalkeeper Dashboard</h2>
+            <p className="text-muted-foreground">
+              Analyze your goalkeeper's performance with detailed metrics and visualizations.
+            </p>
+          </div>
+          <Button onClick={() => navigate("/match-overview")} className="w-full sm:w-auto gap-2">
+            <Calendar size={16} />
+            View All Matches
+          </Button>
         </div>
         
         <PerformanceSummary />
@@ -45,11 +58,17 @@ const Index = () => {
           
           <TabsContent value="analysis">
             <Card>
-              <CardHeader>
-                <CardTitle>Performance Analysis</CardTitle>
-                <CardDescription>
-                  Detailed breakdown of goalkeeper performance
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Performance Analysis</CardTitle>
+                  <CardDescription>
+                    Detailed breakdown of goalkeeper performance
+                  </CardDescription>
+                </div>
+                <Button variant="outline" onClick={() => navigate("/performance")}>
+                  <BarChart size={16} className="mr-2" />
+                  Full Analysis
+                </Button>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -80,31 +99,45 @@ const Index = () => {
           </TabsContent>
           
           <TabsContent value="matchlog">
-            <MatchLogComponent />
+            <div className="flex flex-col space-y-4">
+              <div className="flex justify-end">
+                <Button onClick={() => navigate("/match-overview")} size="sm">
+                  <Calendar size={16} className="mr-2" />
+                  View All Matches
+                </Button>
+              </div>
+              <MatchLogComponent />
+            </div>
           </TabsContent>
         </Tabs>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Recent Performance</CardTitle>
-            <CardDescription>Last 7 matches</CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Recent Performance</CardTitle>
+              <CardDescription>Last 7 matches</CardDescription>
+            </div>
+            <Button variant="outline" onClick={() => navigate("/match-overview")}>
+              <ClipboardCheck size={16} className="mr-2" />
+              Match History
+            </Button>
           </CardHeader>
           <CardContent>
             <div className="text-center py-10">
-              <p className="text-4xl font-bold">85.4%</p>
+              <p className="text-4xl font-bold">{performanceSummary.savePercentage}%</p>
               <p className="text-muted-foreground mt-2">Save success rate</p>
               
               <div className="flex justify-center gap-8 mt-8">
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-keeper-green">35</p>
+                  <p className="text-2xl font-bold text-keeper-green">{performanceSummary.totalSaves}</p>
                   <p className="text-muted-foreground text-sm">Saves Made</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-keeper-red">6</p>
+                  <p className="text-2xl font-bold text-keeper-red">{performanceSummary.totalGoalsConceded}</p>
                   <p className="text-muted-foreground text-sm">Goals Conceded</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-keeper-blue">3</p>
+                  <p className="text-2xl font-bold text-keeper-blue">{performanceSummary.cleanSheets}</p>
                   <p className="text-muted-foreground text-sm">Clean Sheets</p>
                 </div>
               </div>

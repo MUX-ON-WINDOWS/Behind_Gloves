@@ -8,7 +8,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton
 } from "@/components/ui/sidebar";
-import { BarChart, LineChart, PieChart, Settings, User } from "lucide-react";
+import { BarChart, LineChart, PieChart, Settings, User, Calendar, Save } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/hooks/useTheme";
 import { Link, useLocation } from "react-router-dom";
@@ -28,6 +28,11 @@ const navItems = [
     title: "Shot Map",
     icon: PieChart,
     path: "/shot-map"
+  },
+  {
+    title: "Match Overview",
+    icon: Calendar,
+    path: "/match-overview"
   },
   {
     title: "Profile",
