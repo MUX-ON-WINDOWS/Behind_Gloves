@@ -1,6 +1,6 @@
 
-import { MatchLog } from "@/types/store-types";
-import { goalsConcededData, savesMadeData } from "@/lib/chart-data";
+import { MatchLog } from '@/types/store-types';
+import { goalsConcededData, savesMadeData } from '@/lib/chart-data';
 
 // Generate sample match logs based on the goals conceded data
 export const generateInitialMatchLogs = (): MatchLog[] => {
