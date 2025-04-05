@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,19 +7,53 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Mail, MapPin, Phone, User } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { EditProfileForm } from "@/components/EditProfileForm";
+import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
 
 const Profile = () => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [profile, setProfile] = useState({
+    fullName: "Alex James Morgan",
+    location: "Manchester, United Kingdom",
+    email: "alex.morgan@fcunited.com",
+    phone: "+44 7123 456789",
+    height: "6'2\" (188 cm)",
+    weight: "185 lbs (84 kg)",
+    age: 27,
+    nationality: "British",
+    joined: "August 2021",
+    contractUntil: "June 2026",
+    preferredHand: "Right",
+    profilePicture: "/placeholder.svg",
+  });
+
+  const handleProfileUpdate = (values: any) => {
+    setProfile({
+      ...profile,
+      ...values,
+    });
+    setIsEditing(false);
+  };
+
+  const handleImageChange = (imageUrl: string) => {
+    setProfile({
+      ...profile,
+      profilePicture: imageUrl,
+    });
+  };
+
   return (
     <Layout>
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row gap-6 md:items-center md:justify-between">
           <div className="flex flex-col md:flex-row gap-4 md:items-center">
             <Avatar className="h-24 w-24">
-              <AvatarImage src="/placeholder.svg" alt="Goalkeeper" />
+              <AvatarImage src={profile.profilePicture} alt="Goalkeeper" />
               <AvatarFallback>GK</AvatarFallback>
             </Avatar>
             <div>
-              <h2 className="text-3xl font-bold tracking-tight">Alex Morgan</h2>
+              <h2 className="text-3xl font-bold tracking-tight">{profile.fullName}</h2>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Badge variant="outline">Goalkeeper</Badge>
                 <Badge variant="outline">FC United</Badge>
@@ -26,9 +61,11 @@ const Profile = () => {
               </div>
             </div>
           </div>
-          <Button className="w-full md:w-auto">
-            <Edit className="mr-2 h-4 w-4" /> Edit Profile
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => setIsEditing(true)}>
+              <Edit className="mr-2 h-4 w-4" /> Edit Profile
+            </Button>
+          </div>
         </div>
         
         <div className="grid gap-6 md:grid-cols-3">
@@ -41,28 +78,28 @@ const Profile = () => {
                 <User className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm text-muted-foreground">Full Name</p>
-                  <p>Alex James Morgan</p>
+                  <p>{profile.fullName}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <MapPin className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm text-muted-foreground">Location</p>
-                  <p>Manchester, United Kingdom</p>
+                  <p>{profile.location}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm text-muted-foreground">Email</p>
-                  <p>alex.morgan@fcunited.com</p>
+                  <p>{profile.email}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm text-muted-foreground">Phone</p>
-                  <p>+44 7123 456789</p>
+                  <p>{profile.phone}</p>
                 </div>
               </div>
             </CardContent>
@@ -77,36 +114,36 @@ const Profile = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground">Height</p>
-                    <p className="font-medium">6'2" (188 cm)</p>
+                    <p className="font-medium">{profile.height}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Weight</p>
-                    <p className="font-medium">185 lbs (84 kg)</p>
+                    <p className="font-medium">{profile.weight}</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground">Age</p>
-                    <p className="font-medium">27</p>
+                    <p className="font-medium">{profile.age}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Nationality</p>
-                    <p className="font-medium">British</p>
+                    <p className="font-medium">{profile.nationality}</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground">Joined</p>
-                    <p className="font-medium">August 2021</p>
+                    <p className="font-medium">{profile.joined}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Contract Until</p>
-                    <p className="font-medium">June 2026</p>
+                    <p className="font-medium">{profile.contractUntil}</p>
                   </div>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Preferred Hand</p>
-                  <p className="font-medium">Right</p>
+                  <p className="font-medium">{profile.preferredHand}</p>
                 </div>
               </div>
             </CardContent>
@@ -259,6 +296,26 @@ const Profile = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+          </DialogHeader>
+          <div className="grid md:grid-cols-[200px_1fr] gap-6">
+            <ProfilePictureUpload 
+              initialImage={profile.profilePicture} 
+              onImageChange={handleImageChange} 
+            />
+            <EditProfileForm 
+              initialValues={profile}
+              onSave={handleProfileUpdate}
+              onCancel={() => setIsEditing(false)}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };
