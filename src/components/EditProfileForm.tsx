@@ -127,7 +127,7 @@ export function EditProfileForm({ onSave, initialValues, onCancel }: EditProfile
               <FormItem>
                 <FormLabel>Height</FormLabel>
                 <FormControl>
-                  <Input placeholder="6'2\" (188 cm)" {...field} />
+                  <Input placeholder="6'2&quot; (188 cm)" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
