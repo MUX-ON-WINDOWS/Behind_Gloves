@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useDataStore } from "@/lib/data-store";
 
 export const TeamScoreboard = () => {
   const [teams, setTeams] = useState(teamScoreboard);
@@ -16,6 +17,7 @@ export const TeamScoreboard = () => {
   const [goalsFor, setGoalsFor] = useState(0);
   const [goalsAgainst, setGoalsAgainst] = useState(0);
   const { toast } = useToast();
+  const { userSettings } = useDataStore();
 
   const openScoreDialog = (teamIndex: number) => {
     setSelectedTeam(teamIndex);
@@ -91,7 +93,7 @@ export const TeamScoreboard = () => {
             </TableHeader>
             <TableBody>
               {teams.map((team, index) => (
-                <TableRow key={team.team} className={team.team === "FC United" ? "bg-primary/10" : ""}>
+                <TableRow key={team.team} className={team.team === userSettings.clubTeam ? "bg-primary/10" : ""}>
                   <TableCell className="text-center font-medium">{team.position}</TableCell>
                   <TableCell className="font-medium">{team.team}</TableCell>
                   <TableCell className="text-center">{team.played}</TableCell>

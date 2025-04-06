@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 import { ClipboardCheck, Save, ArrowRight } from "lucide-react";
 
 export const LastMatch = () => {
-  const { lastMatch } = useDataStore();
+  const { lastMatch, userSettings } = useDataStore();
   const { homeTeam, homeScore, awayTeam, awayScore, date, venue, cleanSheet, saves } = lastMatch;
   const matchResult = homeScore > awayScore ? "win" : homeScore < awayScore ? "loss" : "draw";
-  const isHomeTeam = homeTeam === "FC United";
+  const isHomeTeam = homeTeam === userSettings.clubTeam;
   
   return (
     <Card>

@@ -28,7 +28,7 @@ export function ClubTeamForm() {
   const form = useForm<ClubTeamFormValues>({
     resolver: zodResolver(clubTeamFormSchema),
     defaultValues: {
-      clubTeam: userSettings.clubTeam,
+      clubTeam: "VV Dongen", // Set the default club team to VV Dongen
     },
   });
 

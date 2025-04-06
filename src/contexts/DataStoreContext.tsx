@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { 
   DataStoreContextType, 
@@ -72,7 +71,7 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
   
   const [userSettings, setUserSettings] = useState<UserSettings>(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_SETTINGS);
-    return saved ? JSON.parse(saved) : { clubTeam: "FC United" };
+    return saved ? JSON.parse(saved) : { clubTeam: "VV Dongen" };
   });
   
   // Save to localStorage whenever state changes
