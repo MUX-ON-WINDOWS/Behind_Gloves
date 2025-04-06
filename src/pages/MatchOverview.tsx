@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -69,7 +68,6 @@ const MatchOverview = () => {
       );
       
       const recentMatch = sortedMatches[0];
-      const isHomeGame = recentMatch.homeTeam === userSettings.clubTeam;
       
       setLastMatch({
         homeTeam: recentMatch.homeTeam,
@@ -81,8 +79,10 @@ const MatchOverview = () => {
         cleanSheet: recentMatch.cleanSheet,
         saves: recentMatch.saves
       });
+      
+      recalculatePerformanceSummary();
     }
-  }, [matchLogs, setLastMatch, userSettings.clubTeam]);
+  }, [matchLogs, setLastMatch, userSettings.clubTeam, recalculatePerformanceSummary]);
   
   const addForm = useForm<MatchFormValues>({
     resolver: zodResolver(matchFormSchema),
@@ -224,7 +224,7 @@ const MatchOverview = () => {
           <div>
             <h2 className="text-3xl font-bold tracking-tight mb-2">Match Overview</h2>
             <p className="text-muted-foreground">
-              Central hub for all match data management
+              Central hub for all match data management ({matchLogs.length} matches)
             </p>
           </div>
           <Button onClick={openAddDialog} className="gap-1">

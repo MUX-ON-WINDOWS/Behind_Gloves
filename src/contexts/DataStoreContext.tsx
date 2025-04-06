@@ -51,7 +51,18 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
   
   const [performanceSummary, setPerformanceSummary] = useState<PerformanceSummary>(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.PERFORMANCE_SUMMARY);
-    return saved ? JSON.parse(saved) : initialPerformanceSummary;
+    const loadedSummary = saved ? JSON.parse(saved) : initialPerformanceSummary;
+    
+    // If we have match logs, make sure performance summary matches the number of logs
+    const savedLogs = localStorage.getItem(LOCAL_STORAGE_KEYS.MATCH_LOGS);
+    if (savedLogs) {
+      const parsedLogs = JSON.parse(savedLogs);
+      if (parsedLogs.length !== loadedSummary.matches) {
+        loadedSummary.matches = parsedLogs.length;
+      }
+    }
+    
+    return loadedSummary;
   });
   
   const [lastMatch, setLastMatch] = useState<LastMatch>(() => {
@@ -77,6 +88,8 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
   // Save to localStorage whenever state changes
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEYS.MATCH_LOGS, JSON.stringify(matchLogs));
+    // Ensure performance summary is updated when match logs change
+    recalculatePerformanceSummary();
   }, [matchLogs]);
   
   useEffect(() => {
