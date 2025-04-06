@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { useTheme } from "@/hooks/useTheme";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowRight, Bell, CloudLightning, Gauge, Lock, Save, Shield, User } from "lucide-react";
+import { ClubTeamForm } from "@/components/ClubTeamForm";
 
 const Settings = () => {
   const { toast } = useToast();
@@ -82,6 +83,16 @@ const Settings = () => {
                     <Label htmlFor="teamRole">Team Role</Label>
                     <Input id="teamRole" placeholder="Goalkeeper" defaultValue="Goalkeeper" />
                   </div>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Club Team Settings</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Set your club team name. This will be used as the home team in match statistics.
+                  </p>
+                  <ClubTeamForm />
                 </div>
                 
                 <Separator />

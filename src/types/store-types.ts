@@ -68,6 +68,10 @@ export interface MatchLog {
   notes?: string;
 }
 
+export interface UserSettings {
+  clubTeam: string;
+}
+
 // Store context type
 export interface DataStoreContextType {
   goalsConcededData: GoalsConcededDataPoint[];
@@ -86,6 +90,8 @@ export interface DataStoreContextType {
   setTeamScoreboard: (data: TeamData[]) => void;
   matchLogs: MatchLog[];
   setMatchLogs: (logs: MatchLog[]) => void;
+  userSettings: UserSettings;
+  setUserSettings: (settings: UserSettings) => void;
   addMatchLog: (match: Omit<MatchLog, "id">) => void;
   updateMatchLog: (id: string, match: Partial<MatchLog>) => void;
   deleteMatchLog: (id: string) => void;

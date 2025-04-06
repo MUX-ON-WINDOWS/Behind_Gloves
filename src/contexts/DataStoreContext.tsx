@@ -9,7 +9,8 @@ import {
   LastMatch, 
   UpcomingMatch, 
   TeamData, 
-  MatchLog 
+  MatchLog,
+  UserSettings 
 } from '@/types/store-types';
 import { LOCAL_STORAGE_KEYS } from '@/constants/storage-keys';
 import { generateInitialMatchLogs } from '@/utils/store-utils';
@@ -69,6 +70,11 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
     return saved ? JSON.parse(saved) : initialTeamScoreboard;
   });
   
+  const [userSettings, setUserSettings] = useState<UserSettings>(() => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_SETTINGS);
+    return saved ? JSON.parse(saved) : { clubTeam: "FC United" };
+  });
+  
   // Save to localStorage whenever state changes
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEYS.MATCH_LOGS, JSON.stringify(matchLogs));
@@ -102,6 +108,10 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem(LOCAL_STORAGE_KEYS.TEAM_SCOREBOARD, JSON.stringify(teamScoreboard));
   }, [teamScoreboard]);
   
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEYS.USER_SETTINGS, JSON.stringify(userSettings));
+  }, [userSettings]);
+  
   // Generate statistics from match logs
   useEffect(() => {
     if (matchLogs.length > 0) {
@@ -112,7 +122,7 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
         .reverse();
       
       const newGoalsConceded = last6Matches.map((match, index) => {
-        const isHomeGame = match.homeTeam === "FC United";
+        const isHomeGame = match.homeTeam === userSettings.clubTeam;
         const goalsAgainst = isHomeGame ? match.awayScore : match.homeScore;
         // Format date to show just month/day
         const matchDate = new Date(match.date);
@@ -138,7 +148,7 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
       setGoalsConcededData(newGoalsConceded);
       setSavesMadeData(newSavesMade);
     }
-  }, [matchLogs]);
+  }, [matchLogs, userSettings.clubTeam]);
   
   // Helper functions for match logs
   const addMatchLog = (match: Omit<MatchLog, "id">) => {
@@ -165,15 +175,15 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
     let totalSaves = 0;
     let totalGoalsConceded = 0;
     let totalCleanSheets = 0;
-    let fcUnitedWins = 0;
-    let fcUnitedDraws = 0;
-    let fcUnitedLosses = 0;
+    let teamWins = 0;
+    let teamDraws = 0;
+    let teamLosses = 0;
     
     matchLogs.forEach(match => {
       totalSaves += match.saves;
       
-      const isHomeGame = match.homeTeam === 'FC United';
-      const fcUnitedScore = isHomeGame ? match.homeScore : match.awayScore;
+      const isHomeGame = match.homeTeam === userSettings.clubTeam;
+      const teamScore = isHomeGame ? match.homeScore : match.awayScore;
       const opponentScore = isHomeGame ? match.awayScore : match.homeScore;
       
       // Determine goals conceded 
@@ -186,12 +196,12 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
       }
       
       // Determine match result
-      if (fcUnitedScore > opponentScore) {
-        fcUnitedWins++;
-      } else if (fcUnitedScore === opponentScore) {
-        fcUnitedDraws++;
+      if (teamScore > opponentScore) {
+        teamWins++;
+      } else if (teamScore === opponentScore) {
+        teamDraws++;
       } else {
-        fcUnitedLosses++;
+        teamLosses++;
       }
     });
     
@@ -212,20 +222,20 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
     
     // Update team scoreboard
     const updatedTeamScoreboard = [...teamScoreboard];
-    const fcUnitedIndex = updatedTeamScoreboard.findIndex(team => team.team === 'FC United');
+    const teamIndex = updatedTeamScoreboard.findIndex(team => team.team === userSettings.clubTeam);
     
-    if (fcUnitedIndex !== -1) {
-      updatedTeamScoreboard[fcUnitedIndex] = {
-        ...updatedTeamScoreboard[fcUnitedIndex],
+    if (teamIndex !== -1) {
+      updatedTeamScoreboard[teamIndex] = {
+        ...updatedTeamScoreboard[teamIndex],
         played: totalMatches,
-        won: fcUnitedWins,
-        drawn: fcUnitedDraws,
-        lost: fcUnitedLosses,
+        won: teamWins,
+        drawn: teamDraws,
+        lost: teamLosses,
         goalsFor: matchLogs.reduce((total, match) => {
-          return total + (match.homeTeam === 'FC United' ? match.homeScore : match.awayScore);
+          return total + (match.homeTeam === userSettings.clubTeam ? match.homeScore : match.awayScore);
         }, 0),
         goalsAgainst: totalGoalsConceded,
-        points: fcUnitedWins * 3 + fcUnitedDraws
+        points: teamWins * 3 + teamDraws
       };
       
       // Resort teams by points
@@ -265,6 +275,8 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
         setTeamScoreboard,
         matchLogs,
         setMatchLogs,
+        userSettings,
+        setUserSettings,
         addMatchLog,
         updateMatchLog,
         deleteMatchLog,

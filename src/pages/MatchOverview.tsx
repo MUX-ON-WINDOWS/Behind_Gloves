@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -51,7 +52,8 @@ const MatchOverview = () => {
     deleteMatchLog, 
     recalculatePerformanceSummary,
     setLastMatch,
-    lastMatch
+    lastMatch,
+    userSettings
   } = useDataStore();
   
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -67,7 +69,7 @@ const MatchOverview = () => {
       );
       
       const recentMatch = sortedMatches[0];
-      const isHomeGame = recentMatch.homeTeam === "FC United";
+      const isHomeGame = recentMatch.homeTeam === userSettings.clubTeam;
       
       setLastMatch({
         homeTeam: recentMatch.homeTeam,
@@ -80,17 +82,17 @@ const MatchOverview = () => {
         saves: recentMatch.saves
       });
     }
-  }, [matchLogs, setLastMatch]);
+  }, [matchLogs, setLastMatch, userSettings.clubTeam]);
   
   const addForm = useForm<MatchFormValues>({
     resolver: zodResolver(matchFormSchema),
     defaultValues: {
       date: new Date().toISOString().split('T')[0],
-      homeTeam: "FC United",
+      homeTeam: userSettings.clubTeam,
       awayTeam: "",
       homeScore: 0,
       awayScore: 0,
-      venue: "United Stadium",
+      venue: "Home Stadium",
       saves: 0,
       cleanSheet: false,
       notes: ""
@@ -101,11 +103,11 @@ const MatchOverview = () => {
     resolver: zodResolver(matchFormSchema),
     defaultValues: {
       date: new Date().toISOString().split('T')[0],
-      homeTeam: "FC United",
+      homeTeam: userSettings.clubTeam,
       awayTeam: "",
       homeScore: 0,
       awayScore: 0,
-      venue: "United Stadium",
+      venue: "Home Stadium",
       saves: 0,
       cleanSheet: false,
       notes: ""
@@ -115,11 +117,11 @@ const MatchOverview = () => {
   const openAddDialog = () => {
     addForm.reset({
       date: new Date().toISOString().split('T')[0],
-      homeTeam: "FC United",
+      homeTeam: userSettings.clubTeam,
       awayTeam: "",
       homeScore: 0,
       awayScore: 0,
-      venue: "United Stadium",
+      venue: "Home Stadium",
       saves: 0,
       cleanSheet: false,
       notes: ""
@@ -254,7 +256,7 @@ const MatchOverview = () => {
             <TableBody>
               {sortedMatches.length > 0 ? (
                 sortedMatches.map((match) => {
-                  const isHomeGame = match.homeTeam === "FC United";
+                  const isHomeGame = match.homeTeam === userSettings.clubTeam;
                   const ourScore = isHomeGame ? match.homeScore : match.awayScore;
                   const theirScore = isHomeGame ? match.awayScore : match.homeScore;
                   const matchResult = ourScore > theirScore ? "win" : ourScore < theirScore ? "loss" : "draw";
