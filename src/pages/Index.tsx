@@ -16,7 +16,7 @@ import { useDataStore } from "@/lib/data-store";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { performanceSummary } = useDataStore();
+  const { performanceSummary, userSettings } = useDataStore();
   
   return (
     <Layout>
@@ -115,7 +115,7 @@ const Index = () => {
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle>Recent Performance</CardTitle>
-              <CardDescription>Last 7 matches</CardDescription>
+              <CardDescription>Team: {userSettings.clubTeam} — Last {performanceSummary.matches} matches</CardDescription>
             </div>
             <Button variant="outline" onClick={() => navigate("/match-overview")}>
               <ClipboardCheck size={16} className="mr-2" />

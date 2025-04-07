@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { 
   DataStoreContextType, 
@@ -88,8 +89,32 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
   // Save to localStorage whenever state changes
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEYS.MATCH_LOGS, JSON.stringify(matchLogs));
-    // Ensure performance summary is updated when match logs change
+    
+    // Ensure all statistics are updated when match logs change
+    if (matchLogs.length > 0) {
+      // Update last match
+      const sortedMatches = [...matchLogs].sort((a, b) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      
+      const recentMatch = sortedMatches[0];
+      setLastMatch({
+        homeTeam: recentMatch.homeTeam,
+        homeScore: recentMatch.homeScore,
+        awayTeam: recentMatch.awayTeam,
+        awayScore: recentMatch.awayScore,
+        date: recentMatch.date,
+        venue: recentMatch.venue,
+        cleanSheet: recentMatch.cleanSheet,
+        saves: recentMatch.saves
+      });
+    }
+    
+    // Update performance summary
     recalculatePerformanceSummary();
+    
+    // Update chart data
+    updateChartData();
   }, [matchLogs]);
   
   useEffect(() => {
@@ -125,7 +150,7 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
   }, [userSettings]);
   
   // Generate statistics from match logs
-  useEffect(() => {
+  const updateChartData = () => {
     if (matchLogs.length > 0) {
       // Update goals conceded and saves made data
       const last6Matches = [...matchLogs]
@@ -133,7 +158,7 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
         .slice(0, 6)
         .reverse();
       
-      const newGoalsConceded = last6Matches.map((match, index) => {
+      const newGoalsConceded = last6Matches.map((match) => {
         const isHomeGame = match.homeTeam === userSettings.clubTeam;
         const goalsAgainst = isHomeGame ? match.awayScore : match.homeScore;
         // Format date to show just month/day
@@ -146,7 +171,7 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
         };
       });
       
-      const newSavesMade = last6Matches.map((match, index) => {
+      const newSavesMade = last6Matches.map((match) => {
         // Format date to show just month/day
         const matchDate = new Date(match.date);
         const formattedDate = `${matchDate.getMonth() + 1}/${matchDate.getDate()}`;
@@ -160,7 +185,14 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
       setGoalsConcededData(newGoalsConceded);
       setSavesMadeData(newSavesMade);
     }
-  }, [matchLogs, userSettings.clubTeam]);
+  };
+  
+  useEffect(() => {
+    // Update chart data when club team changes
+    updateChartData();
+    // Update performance summary when club team changes
+    recalculatePerformanceSummary();
+  }, [userSettings.clubTeam]);
   
   // Helper functions for match logs
   const addMatchLog = (match: Omit<MatchLog, "id">) => {
