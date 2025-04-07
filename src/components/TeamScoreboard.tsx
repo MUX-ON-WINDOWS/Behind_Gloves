@@ -11,13 +11,17 @@ import { useToast } from "@/hooks/use-toast";
 import { useDataStore } from "@/lib/data-store";
 
 export const TeamScoreboard = () => {
-  const [teams, setTeams] = useState(teamScoreboard);
+  const { teamScoreboard, setTeamScoreboard, matchLogs, userSettings, recalculatePerformanceSummary } = useDataStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<number | null>(null);
   const [goalsFor, setGoalsFor] = useState(0);
   const [goalsAgainst, setGoalsAgainst] = useState(0);
   const { toast } = useToast();
-  const { userSettings } = useDataStore();
+
+  // Force recalculation when component mounts to ensure league data is in sync with match logs
+  useState(() => {
+    recalculatePerformanceSummary();
+  }, []);
 
   const openScoreDialog = (teamIndex: number) => {
     setSelectedTeam(teamIndex);
@@ -29,7 +33,7 @@ export const TeamScoreboard = () => {
   const updateScore = () => {
     if (selectedTeam === null) return;
     
-    setTeams(currentTeams => {
+    setTeamScoreboard(currentTeams => {
       const updatedTeams = [...currentTeams];
       const team = {...updatedTeams[selectedTeam]};
       
@@ -68,6 +72,25 @@ export const TeamScoreboard = () => {
     setIsDialogOpen(false);
   };
 
+  // Get team stats directly from match logs for the current user's team
+  const yourTeamLogs = matchLogs.filter(match => 
+    match.homeTeam === userSettings.clubTeam || match.awayTeam === userSettings.clubTeam
+  );
+
+  const yourTeamWins = yourTeamLogs.filter(match => {
+    const isHomeGame = match.homeTeam === userSettings.clubTeam;
+    return isHomeGame ? match.homeScore > match.awayScore : match.awayScore > match.homeScore;
+  }).length;
+
+  const yourTeamDraws = yourTeamLogs.filter(match => {
+    return match.homeScore === match.awayScore;
+  }).length;
+
+  const yourTeamLosses = yourTeamLogs.filter(match => {
+    const isHomeGame = match.homeTeam === userSettings.clubTeam;
+    return isHomeGame ? match.homeScore < match.awayScore : match.awayScore < match.homeScore;
+  }).length;
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -92,30 +115,44 @@ export const TeamScoreboard = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {teams.map((team, index) => (
-                <TableRow key={team.team} className={team.team === userSettings.clubTeam ? "bg-primary/10" : ""}>
-                  <TableCell className="text-center font-medium">{team.position}</TableCell>
-                  <TableCell className="font-medium">{team.team}</TableCell>
-                  <TableCell className="text-center">{team.played}</TableCell>
-                  <TableCell className="text-center">{team.won}</TableCell>
-                  <TableCell className="text-center">{team.drawn}</TableCell>
-                  <TableCell className="text-center">{team.lost}</TableCell>
-                  <TableCell className="text-center">{team.goalsFor}</TableCell>
-                  <TableCell className="text-center">{team.goalsAgainst}</TableCell>
-                  <TableCell className="text-center font-bold">{team.points}</TableCell>
-                  <TableCell className="text-right">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => openScoreDialog(index)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Plus className="h-4 w-4" />
-                      <span className="sr-only">Add score</span>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {teamScoreboard.map((team, index) => {
+                // For the user's team, ensure data is synced with match logs
+                const isUserTeam = team.team === userSettings.clubTeam;
+                
+                // Display either database values or dynamically calculated ones for user team
+                const displayData = {
+                  ...team,
+                  played: isUserTeam ? yourTeamLogs.length : team.played,
+                  won: isUserTeam ? yourTeamWins : team.won,
+                  drawn: isUserTeam ? yourTeamDraws : team.drawn,
+                  lost: isUserTeam ? yourTeamLosses : team.lost
+                };
+                
+                return (
+                  <TableRow key={team.team} className={team.team === userSettings.clubTeam ? "bg-primary/10" : ""}>
+                    <TableCell className="text-center font-medium">{team.position}</TableCell>
+                    <TableCell className="font-medium">{team.team}</TableCell>
+                    <TableCell className="text-center">{displayData.played}</TableCell>
+                    <TableCell className="text-center">{displayData.won}</TableCell>
+                    <TableCell className="text-center">{displayData.drawn}</TableCell>
+                    <TableCell className="text-center">{displayData.lost}</TableCell>
+                    <TableCell className="text-center">{team.goalsFor}</TableCell>
+                    <TableCell className="text-center">{team.goalsAgainst}</TableCell>
+                    <TableCell className="text-center font-bold">{team.points}</TableCell>
+                    <TableCell className="text-right">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => openScoreDialog(index)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Plus className="h-4 w-4" />
+                        <span className="sr-only">Add score</span>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
@@ -125,7 +162,7 @@ export const TeamScoreboard = () => {
             <DialogHeader>
               <DialogTitle>Add Match Result</DialogTitle>
               <DialogDescription>
-                {selectedTeam !== null ? `Update scores for ${teams[selectedTeam].team}` : 'Update team scores'}
+                {selectedTeam !== null ? `Update scores for ${teamScoreboard[selectedTeam].team}` : 'Update team scores'}
               </DialogDescription>
             </DialogHeader>
             
