@@ -1,5 +1,6 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { teamScoreboard } from "@/lib/chart-data";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -18,9 +19,9 @@ export const TeamScoreboard = () => {
   const { toast } = useToast();
 
   // Force recalculation when component mounts to ensure league data is in sync with match logs
-  useEffect(() => {
+  useState(() => {
     recalculatePerformanceSummary();
-  }, [recalculatePerformanceSummary]);
+  }, []);
 
   const openScoreDialog = (teamIndex: number) => {
     setSelectedTeam(teamIndex);
@@ -65,7 +66,7 @@ export const TeamScoreboard = () => {
     
     toast({
       title: "Score Updated",
-      description: `Updated scores for ${teamScoreboard[selectedTeam].team}`,
+      description: `Updated scores for ${teams[selectedTeam].team}`,
     });
     
     setIsDialogOpen(false);
