@@ -6,23 +6,99 @@ import { useTheme } from "@/hooks/useTheme";
 import { useDataStore } from "@/lib/data-store";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
+import { useMemo } from "react";
 
 const Performance = () => {
   const { theme } = useTheme();
-  const { performanceSummary, savesMadeData } = useDataStore();
+  const { performanceSummary, savesMadeData, matchLogs, userSettings } = useDataStore();
   
   const textColor = theme === "dark" ? "#f8fafc" : "#0f172a";
   const gridColor = theme === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)";
 
-  // Sample performance trends data
-  const performanceTrends = [
-    { month: "Jan", savePercentage: 76, leagueAverage: 71 },
-    { month: "Feb", savePercentage: 78, leagueAverage: 72 },
-    { month: "Mar", savePercentage: 81, leagueAverage: 73 },
-    { month: "Apr", savePercentage: 79, leagueAverage: 72 },
-    { month: "May", savePercentage: 82, leagueAverage: 74 },
-    { month: "Jun", savePercentage: 85, leagueAverage: 75 },
-  ];
+  // Generate performance trends from match logs
+  const performanceTrends = useMemo(() => {
+    // Get the last 6 months of data
+    const months = [];
+    const currentDate = new Date();
+    
+    for (let i = 5; i >= 0; i--) {
+      const month = new Date(currentDate);
+      month.setMonth(currentDate.getMonth() - i);
+      months.push({
+        date: month,
+        month: month.toLocaleString('default', { month: 'short' }),
+        savePercentage: 0,
+        saves: 0,
+        goalsAgainst: 0,
+        matches: 0
+      });
+    }
+    
+    // Calculate monthly stats from match logs
+    matchLogs.forEach(match => {
+      const matchDate = new Date(match.date);
+      const monthIndex = months.findIndex(m => 
+        m.date.getMonth() === matchDate.getMonth() && 
+        m.date.getFullYear() === matchDate.getFullYear()
+      );
+      
+      if (monthIndex !== -1) {
+        const isHomeGame = match.homeTeam === userSettings.clubTeam;
+        const goalsAgainst = isHomeGame ? match.awayScore : match.homeScore;
+        
+        months[monthIndex].saves += match.saves;
+        months[monthIndex].goalsAgainst += goalsAgainst;
+        months[monthIndex].matches += 1;
+      }
+    });
+    
+    // Calculate save percentages
+    return months.map(month => {
+      const totalShots = month.saves + month.goalsAgainst;
+      const savePercentage = totalShots > 0 
+        ? Math.round((month.saves / totalShots) * 100) 
+        : 0;
+        
+      // League average is simulated (about 5-10% lower)
+      const leagueAverage = Math.max(60, savePercentage - Math.floor(Math.random() * 10) - 5);
+      
+      return {
+        month: month.month,
+        savePercentage,
+        leagueAverage,
+        matches: month.matches
+      };
+    });
+  }, [matchLogs, userSettings.clubTeam]);
+  
+  // Calculate positioning and distribution scores based on match performance
+  const positioningScore = useMemo(() => {
+    if (matchLogs.length === 0) return 0;
+    
+    // Calculate based on clean sheets and saves
+    const cleanSheetRatio = performanceSummary.cleanSheets / performanceSummary.matches;
+    const savesPerMatch = performanceSummary.totalSaves / performanceSummary.matches;
+    
+    // Formula: weight clean sheets heavily and consider save rate
+    const baseScore = (cleanSheetRatio * 6) + (performanceSummary.savePercentage / 20);
+    return parseFloat(Math.min(10, baseScore).toFixed(1));
+  }, [performanceSummary, matchLogs]);
+  
+  const distributionAccuracy = useMemo(() => {
+    // Simulate distribution accuracy based on performance
+    return 65 + Math.floor((performanceSummary.savePercentage - 70) / 2);
+  }, [performanceSummary]);
+  
+  // Calculate trend percentages
+  const savePercentageTrend = useMemo(() => {
+    if (performanceTrends.length < 2) return 0;
+    const current = performanceTrends[performanceTrends.length - 1].savePercentage;
+    const previous = performanceTrends[performanceTrends.length - 2].savePercentage;
+    return current - previous;
+  }, [performanceTrends]);
+
+  const positioningTrend = 0.5; // Simulated trend
+  const distributionTrend = 2; // Simulated trend
 
   return (
     <Layout>
@@ -31,7 +107,7 @@ const Performance = () => {
           <div>
             <h2 className="text-3xl font-bold tracking-tight">Performance Analysis</h2>
             <p className="text-muted-foreground">
-              Detailed trends and metrics for season performance
+              Detailed trends and metrics for {userSettings.clubTeam}
             </p>
           </div>
           <Button variant="outline" size="sm" className="hidden md:flex">
@@ -51,7 +127,7 @@ const Performance = () => {
                 <LineChart data={performanceTrends} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                   <XAxis dataKey="month" stroke={textColor} />
-                  <YAxis stroke={textColor} domain={[60, 100]} />
+                  <YAxis stroke={textColor} domain={[0, 100]} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
@@ -86,22 +162,26 @@ const Performance = () => {
           <Card>
             <CardHeader>
               <CardTitle>Save Success Rate</CardTitle>
-              <CardDescription>Last 10 matches</CardDescription>
+              <CardDescription>Last {performanceSummary.matches} matches</CardDescription>
             </CardHeader>
             <CardContent className="text-center py-6">
               <p className="text-5xl font-bold text-keeper-green">{performanceSummary.savePercentage}%</p>
-              <p className="text-muted-foreground mt-2">+4% from previous 10 matches</p>
+              <p className="text-muted-foreground mt-2">
+                {savePercentageTrend > 0 ? "+" : ""}{savePercentageTrend}% from previous period
+              </p>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader>
               <CardTitle>Positioning Score</CardTitle>
-              <CardDescription>Coach assessment</CardDescription>
+              <CardDescription>Based on match performance</CardDescription>
             </CardHeader>
             <CardContent className="text-center py-6">
-              <p className="text-5xl font-bold">8.2/10</p>
-              <p className="text-muted-foreground mt-2">+0.5 from last assessment</p>
+              <p className="text-5xl font-bold">{positioningScore}/10</p>
+              <p className="text-muted-foreground mt-2">
+                +{positioningTrend} from previous assessment
+              </p>
             </CardContent>
           </Card>
           
@@ -111,8 +191,10 @@ const Performance = () => {
               <CardDescription>Successful passes</CardDescription>
             </CardHeader>
             <CardContent className="text-center py-6">
-              <p className="text-5xl font-bold text-keeper-blue">76%</p>
-              <p className="text-muted-foreground mt-2">+2% from season average</p>
+              <p className="text-5xl font-bold text-keeper-blue">{distributionAccuracy}%</p>
+              <p className="text-muted-foreground mt-2">
+                +{distributionTrend}% from season average
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -127,9 +209,9 @@ const Performance = () => {
               <div>
                 <h3 className="text-lg font-medium mb-2">Strengths</h3>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                  <li>Excellent reflexes on close-range shots (92% save rate)</li>
+                  <li>Excellent reflexes on close-range shots ({Math.round(performanceSummary.savePercentage)}% save rate)</li>
                   <li>Strong command of the penalty area during set pieces</li>
-                  <li>Consistent performances in high-pressure matches</li>
+                  <li>{performanceSummary.cleanSheets} clean sheets in {performanceSummary.matches} matches</li>
                   <li>Above-average distribution to initiate counterattacks</li>
                 </ul>
               </div>
@@ -137,7 +219,7 @@ const Performance = () => {
               <div>
                 <h3 className="text-lg font-medium mb-2">Areas for Improvement</h3>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                  <li>Positioning for long-range shots from right side (68% save rate)</li>
+                  <li>Positioning for long-range shots from right side</li>
                   <li>Communication with defensive line during transitions</li>
                   <li>Decision making on when to come off the line</li>
                 </ul>
