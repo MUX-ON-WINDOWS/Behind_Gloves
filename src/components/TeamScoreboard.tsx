@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -16,10 +17,10 @@ export const TeamScoreboard = () => {
   const [goalsAgainst, setGoalsAgainst] = useState(0);
   const { toast } = useToast();
 
-  // Force recalculation when component mounts to ensure league data is in sync with match logs
-  useState(() => {
+  // Fix for error #1: Use useEffect instead of useState for side effects
+  useEffect(() => {
     recalculatePerformanceSummary();
-  }, []);
+  }, [recalculatePerformanceSummary]);
 
   const openScoreDialog = (teamIndex: number) => {
     setSelectedTeam(teamIndex);
@@ -31,36 +32,38 @@ export const TeamScoreboard = () => {
   const updateScore = () => {
     if (selectedTeam === null) return;
     
-    setTeamScoreboard(currentTeams => {
-      const updatedTeams = [...currentTeams];
-      const team = {...updatedTeams[selectedTeam]};
-      
-      // Update goals
-      team.goalsFor += goalsFor;
-      team.goalsAgainst += goalsAgainst;
-      
-      // Update wins, losses, draws based on this match result
-      if (goalsFor > goalsAgainst) {
-        team.won += 1;
-        team.points += 3;
-      } else if (goalsFor < goalsAgainst) {
-        team.lost += 1;
-      } else if (goalsFor === goalsAgainst && (goalsFor > 0 || goalsAgainst > 0)) {
-        team.drawn += 1;
-        team.points += 1;
-      }
-      
-      // Update played matches
-      if (goalsFor > 0 || goalsAgainst > 0) {
-        team.played += 1;
-      }
-      
-      updatedTeams[selectedTeam] = team;
-      
-      // Re-sort teams by points
-      return updatedTeams.sort((a, b) => b.points - a.points)
-        .map((team, index) => ({...team, position: index + 1}));
-    });
+    // Fix for error #2: Create the updated array first, then pass it to setTeamScoreboard
+    const updatedTeams = [...teamScoreboard];
+    const team = {...updatedTeams[selectedTeam]};
+    
+    // Update goals
+    team.goalsFor += goalsFor;
+    team.goalsAgainst += goalsAgainst;
+    
+    // Update wins, losses, draws based on this match result
+    if (goalsFor > goalsAgainst) {
+      team.won += 1;
+      team.points += 3;
+    } else if (goalsFor < goalsAgainst) {
+      team.lost += 1;
+    } else if (goalsFor === goalsAgainst && (goalsFor > 0 || goalsAgainst > 0)) {
+      team.drawn += 1;
+      team.points += 1;
+    }
+    
+    // Update played matches
+    if (goalsFor > 0 || goalsAgainst > 0) {
+      team.played += 1;
+    }
+    
+    updatedTeams[selectedTeam] = team;
+    
+    // Re-sort teams by points
+    const sortedTeams = updatedTeams.sort((a, b) => b.points - a.points)
+      .map((team, index) => ({...team, position: index + 1}));
+    
+    // Pass the complete array to setTeamScoreboard
+    setTeamScoreboard(sortedTeams);
     
     toast({
       title: "Score Updated",
