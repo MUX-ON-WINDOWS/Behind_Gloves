@@ -12,6 +12,7 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import MatchOverview from "./pages/MatchOverview";
 import League from "./pages/League";
+import VideoUpload from "./pages/VideoUpload";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/match-overview" element={<MatchOverview />} />
             <Route path="/league" element={<League />} />
+            <Route path="/video-upload" element={<VideoUpload />} />
             <Route path="/matches" element={<Navigate to="/match-overview" replace />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

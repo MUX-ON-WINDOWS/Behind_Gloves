@@ -8,7 +8,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton
 } from "@/components/ui/sidebar";
-import { BarChart, LineChart, PieChart, Settings, User, Calendar, Save, Users } from "lucide-react";
+import { BarChart, LineChart, PieChart, Settings, User, Calendar, Users, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/hooks/useTheme";
 import { Link, useLocation } from "react-router-dom";
@@ -38,6 +38,11 @@ const navItems = [
     title: "League",
     icon: Users,
     path: "/league"
+  },
+  {
+    title: "Video Analysis",
+    icon: Video,
+    path: "/video-upload"
   },
   {
     title: "Profile",
