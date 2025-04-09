@@ -7,11 +7,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { DataStoreProvider } from "./lib/data-store";
 import Index from "./pages/Index";
 import Performance from "./pages/Performance";
-import ShotMap from "./pages/ShotMap";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import MatchOverview from "./pages/MatchOverview";
-import League from "./pages/League";
 import VideoUpload from "./pages/VideoUpload";
 import NotFound from "./pages/NotFound";
 
@@ -27,11 +25,9 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/performance" element={<Performance />} />
-            <Route path="/shot-map" element={<ShotMap />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/match-overview" element={<MatchOverview />} />
-            <Route path="/league" element={<League />} />
             <Route path="/video-upload" element={<VideoUpload />} />
             <Route path="/matches" element={<Navigate to="/match-overview" replace />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
