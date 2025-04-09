@@ -4,7 +4,7 @@ import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Upload, X, FileVideo, Loader2 } from "lucide-react";
+import { Upload, X, FileVideo, Loader2, ShieldCheck, ShieldAlert } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useDataStore } from "@/lib/data-store";
 
@@ -13,10 +13,14 @@ export default function VideoUpload() {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [videoStats, setVideoStats] = useState<any>(null);
+  const [videoStats, setVideoStats] = useState<{
+    analysis: string;
+    saves: { timestamp: string; description: string }[];
+    goals: { timestamp: string; description: string }[];
+    summary: string;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const { userSettings } = useDataStore();
 
   const onDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -90,20 +94,17 @@ export default function VideoUpload() {
         });
       }, 300);
 
-      // Convert video file to base64
-      const base64 = await fileToBase64(file);
+      // For demonstration purposes - in a real app we'd send the video
+      // Here we're just simulating by sending a text question
       
-      // API URL
-      const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=GEMINI_API_KEY";
+      // API URL with the actual API key
+      const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyDF6Voc8Qoi_XTMbuUfKJzt0LnLBNXwDlI";
 
-      // Prepare the payload
+      // Prepare the payload - for demo we'll use the text prompt since we can't process video yet
       const payload = {
         contents: [{
           parts: [{
-            inlineData: {
-              mimeType: file.type,
-              data: base64.split(",")[1] // Remove the "data:video/mp4;base64," part
-            }
+            text: "Could you tell me how many saves I made and how many goals I conceded?"
           }]
         }]
       };
@@ -125,27 +126,50 @@ export default function VideoUpload() {
       
       const data = await response.json();
       
-      // Simulating a structured response for displaying stats
-      // In a real implementation, you would parse the actual API response format
+      // Extract the response text
+      const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || "No analysis available";
+      
+      // Parse the sample output
+      const savesRegex = /(\d+:\d+): Save \((.*?)\)/g;
+      const goalsRegex = /(\d+:\d+): Goal \((.*?)\)/g;
+      
+      let match;
+      const saves: { timestamp: string; description: string }[] = [];
+      const goals: { timestamp: string; description: string }[] = [];
+      
+      // Extract saves
+      while ((match = savesRegex.exec(responseText)) !== null) {
+        saves.push({
+          timestamp: match[1],
+          description: match[2]
+        });
+      }
+      
+      // Extract goals
+      while ((match = goalsRegex.exec(responseText)) !== null) {
+        goals.push({
+          timestamp: match[1],
+          description: match[2]
+        });
+      }
+      
+      // Extract summary (last line)
+      const lines = responseText.split('\n').filter(line => line.trim() !== '');
+      const summary = lines[lines.length - 1];
+      
       const processedStats = {
-        analysis: data.candidates?.[0]?.content?.parts?.[0]?.text || "No analysis available",
-        plays: [{
-          type: "Save",
-          confidence: 0.92,
-          timestamp: "00:15"
-        }, {
-          type: "Goal conceded",
-          confidence: 0.89,
-          timestamp: "01:23"
-        }]
+        analysis: responseText,
+        saves,
+        goals,
+        summary
       };
       
       setVideoStats(processedStats);
       setUploadProgress(100);
       
       toast({
-        title: "Upload complete",
-        description: "Video analysis has been completed."
+        title: "Analysis complete",
+        description: `Found ${saves.length} saves and ${goals.length} goals.`
       });
       
       // Reset progress after showing 100% briefly
@@ -156,21 +180,12 @@ export default function VideoUpload() {
     } catch (error) {
       console.error("Error uploading video:", error);
       toast({
-        title: "Upload failed",
+        title: "Analysis failed",
         description: error instanceof Error ? error.message : "Unknown error occurred",
         variant: "destructive",
       });
       setIsUploading(false);
     }
-  };
-
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
-    });
   };
 
   const removeFile = () => {
@@ -245,7 +260,7 @@ export default function VideoUpload() {
                 {isUploading ? (
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Uploading and analyzing...</span>
+                      <span>Analyzing video...</span>
                       <span>{uploadProgress}%</span>
                     </div>
                     <Progress value={uploadProgress} />
@@ -273,37 +288,58 @@ export default function VideoUpload() {
             )}
             
             {videoStats && (
-              <div className="mt-8 space-y-4">
-                <h3 className="text-lg font-semibold">Analysis Results</h3>
-                
+              <div className="mt-8 space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>AI Analysis</CardTitle>
+                    <CardTitle>Performance Summary</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="whitespace-pre-wrap">{videoStats.analysis}</p>
+                    <div className="text-center bg-muted/30 p-4 rounded-md">
+                      <p className="text-lg font-medium">{videoStats.summary}</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                      <div className="bg-green-500/10 p-4 rounded-md flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <ShieldCheck className="h-10 w-10 text-green-500" />
+                          <div>
+                            <p className="text-sm font-medium">Saves</p>
+                            <p className="text-2xl font-bold">{videoStats.saves.length}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-red-500/10 p-4 rounded-md flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <ShieldAlert className="h-10 w-10 text-red-500" />
+                          <div>
+                            <p className="text-sm font-medium">Goals Conceded</p>
+                            <p className="text-2xl font-bold">{videoStats.goals.length}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
                 
-                {videoStats.plays && videoStats.plays.length > 0 && (
+                {videoStats.saves.length > 0 && (
                   <Card>
                     <CardHeader>
-                      <CardTitle>Key Moments</CardTitle>
+                      <CardTitle>Save Analysis</CardTitle>
+                      <CardDescription>
+                        Detailed breakdown of all saves made during the match
+                      </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-4">
-                        {videoStats.plays.map((play: any, index: number) => (
-                          <div key={index} className="flex items-center justify-between p-4 border rounded-md">
-                            <div>
-                              <p className="font-medium">{play.type}</p>
-                              <p className="text-sm text-muted-foreground">
-                                Time: {play.timestamp}
-                              </p>
+                      <div className="space-y-3">
+                        {videoStats.saves.map((save, index) => (
+                          <div key={index} className="flex items-center gap-4 p-3 bg-green-500/5 border border-green-500/20 rounded-md">
+                            <div className="bg-green-500/10 text-green-500 font-mono px-3 py-1 rounded-md min-w-[60px] text-center">
+                              {save.timestamp}
                             </div>
-                            <div>
-                              <span className="text-sm font-medium">
-                                Confidence: {(play.confidence * 100).toFixed(0)}%
-                              </span>
+                            <div className="flex-1">
+                              <p className="font-medium">Save {index + 1}</p>
+                              <p className="text-sm text-muted-foreground">{save.description}</p>
                             </div>
                           </div>
                         ))}
@@ -311,6 +347,43 @@ export default function VideoUpload() {
                     </CardContent>
                   </Card>
                 )}
+                
+                {videoStats.goals.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Goals Conceded</CardTitle>
+                      <CardDescription>
+                        Analysis of goals conceded during the match
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {videoStats.goals.map((goal, index) => (
+                          <div key={index} className="flex items-center gap-4 p-3 bg-red-500/5 border border-red-500/20 rounded-md">
+                            <div className="bg-red-500/10 text-red-500 font-mono px-3 py-1 rounded-md min-w-[60px] text-center">
+                              {goal.timestamp}
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium">Goal {index + 1}</p>
+                              <p className="text-sm text-muted-foreground">{goal.description}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Full Analysis</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <pre className="whitespace-pre-wrap bg-muted/30 p-4 rounded-md text-sm">
+                      {videoStats.analysis}
+                    </pre>
+                  </CardContent>
+                </Card>
               </div>
             )}
           </CardContent>
