@@ -1,5 +1,4 @@
 
-// Local storage keys
 export const LOCAL_STORAGE_KEYS = {
   GOALS_CONCEDED: 'goalie-vision-goals-conceded',
   SAVES_MADE: 'goalie-vision-saves-made',
@@ -9,5 +8,6 @@ export const LOCAL_STORAGE_KEYS = {
   UPCOMING_MATCH: 'goalie-vision-upcoming-match',
   TEAM_SCOREBOARD: 'goalie-vision-team-scoreboard',
   MATCH_LOGS: 'goalie-vision-match-logs',
-  USER_SETTINGS: 'goalie-vision-user-settings'
+  USER_SETTINGS: 'goalie-vision-user-settings',
+  VIDEO_ANALYSES: 'goalie-vision-video-analyses'
 };

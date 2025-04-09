@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { 
   DataStoreContextType, 
@@ -10,7 +9,8 @@ import {
   UpcomingMatch, 
   TeamData, 
   MatchLog,
-  UserSettings 
+  UserSettings,
+  VideoAnalysis
 } from '@/types/store-types';
 import { LOCAL_STORAGE_KEYS } from '@/constants/storage-keys';
 import { generateInitialMatchLogs } from '@/utils/store-utils';
@@ -33,6 +33,11 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
   const [matchLogs, setMatchLogs] = useState<MatchLog[]>(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.MATCH_LOGS);
     return saved ? JSON.parse(saved) : generateInitialMatchLogs();
+  });
+  
+  const [videoAnalyses, setVideoAnalyses] = useState<VideoAnalysis[]>(() => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.VIDEO_ANALYSES);
+    return saved ? JSON.parse(saved) : [];
   });
   
   const [goalsConcededData, setGoalsConcededData] = useState<GoalsConcededDataPoint[]>(() => {
@@ -116,6 +121,10 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
     // Update chart data
     updateChartData();
   }, [matchLogs]);
+  
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEYS.VIDEO_ANALYSES, JSON.stringify(videoAnalyses));
+  }, [videoAnalyses]);
   
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEYS.GOALS_CONCEDED, JSON.stringify(goalsConcededData));
@@ -211,6 +220,19 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
   
   const deleteMatchLog = (id: string) => {
     setMatchLogs(prev => prev.filter(log => log.id !== id));
+  };
+  
+  // Helper functions for video analyses
+  const addVideoAnalysis = (video: Omit<VideoAnalysis, "id">) => {
+    const newVideo: VideoAnalysis = {
+      ...video,
+      id: `video-${Date.now()}`
+    };
+    setVideoAnalyses(prev => [...prev, newVideo]);
+  };
+  
+  const deleteVideoAnalysis = (id: string) => {
+    setVideoAnalyses(prev => prev.filter(video => video.id !== id));
   };
   
   // Function to recalculate performance summary based on match logs
@@ -324,7 +346,11 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
         addMatchLog,
         updateMatchLog,
         deleteMatchLog,
-        recalculatePerformanceSummary
+        recalculatePerformanceSummary,
+        videoAnalyses,
+        setVideoAnalyses,
+        addVideoAnalysis,
+        deleteVideoAnalysis
       }}
     >
       {children}

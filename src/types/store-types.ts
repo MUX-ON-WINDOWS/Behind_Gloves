@@ -68,6 +68,23 @@ export interface MatchLog {
   notes?: string;
 }
 
+export interface VideoAnalysis {
+  id: string;
+  date: string;
+  title: string;
+  description?: string;
+  saves: number;
+  goals: number;
+  videoStats: {
+    analysis: string;
+    saves: { timestamp: string; description: string }[];
+    goals: { timestamp: string; description: string }[];
+    summary: string;
+    title?: string;
+    description?: string;
+  };
+}
+
 export interface UserSettings {
   clubTeam: string;
 }
@@ -96,4 +113,8 @@ export interface DataStoreContextType {
   updateMatchLog: (id: string, match: Partial<MatchLog>) => void;
   deleteMatchLog: (id: string) => void;
   recalculatePerformanceSummary: () => void;
+  videoAnalyses: VideoAnalysis[];
+  setVideoAnalyses: (videos: VideoAnalysis[]) => void;
+  addVideoAnalysis: (video: Omit<VideoAnalysis, "id">) => void;
+  deleteVideoAnalysis: (id: string) => void;
 }
