@@ -20,9 +20,9 @@ const navItems = [
     path: "/"
   },
   {
-    title: "Match Overview",
+    title: "Data Overview",
     icon: Calendar,
-    path: "/match-overview"
+    path: "/data-overview"
   },
   {
     title: "Performance",
@@ -66,7 +66,7 @@ export const DashboardSidebar = ({ className }: { className?: string }) => {
                   <Link to={item.path} className="flex items-center gap-3 px-3 py-2">
                     <item.icon size={18} />
                     <span>{item.title}</span>
-                    {item.title === "Match Overview" && <span className="ml-auto text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">Main</span>}
+                    {item.title === "Data Overview" && <span className="ml-auto text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">Main</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useDataStore } from "@/lib/data-store";
-import { MatchLog } from "@/types/store-types";
+import { MatchLog, VideoAnalysis } from "@/types/store-types";
 import { 
   Table, 
   TableBody, 
@@ -22,12 +23,15 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Edit, Trash2, Plus, Save } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Edit, Trash2, Plus, Save, Video, ShieldCheck, ShieldAlert } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { Link } from "react-router-dom";
 
 const matchFormSchema = z.object({
   date: z.string().min(1, "Date is required"),
@@ -43,12 +47,14 @@ const matchFormSchema = z.object({
 
 type MatchFormValues = z.infer<typeof matchFormSchema>;
 
-const MatchOverview = () => {
+const DataOverview = () => {
   const { 
     matchLogs, 
+    videoAnalyses,
     addMatchLog, 
     updateMatchLog, 
     deleteMatchLog, 
+    deleteVideoAnalysis,
     recalculatePerformanceSummary,
     setLastMatch,
     lastMatch,
@@ -59,6 +65,9 @@ const MatchOverview = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
+  const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
+  const [isDeleteVideoDialogOpen, setIsDeleteVideoDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("matches");
   const { toast } = useToast();
   
   useEffect(() => {
@@ -153,6 +162,11 @@ const MatchOverview = () => {
     setIsDeleteDialogOpen(true);
   };
   
+  const openDeleteVideoDialog = (id: string) => {
+    setSelectedVideoId(id);
+    setIsDeleteVideoDialogOpen(true);
+  };
+  
   const handleAddMatch = (data: MatchFormValues) => {
     const newMatchData: Omit<MatchLog, "id"> = {
       date: data.date,
@@ -211,118 +225,218 @@ const MatchOverview = () => {
     }
   };
   
+  const handleDeleteVideoAnalysis = () => {
+    if (selectedVideoId) {
+      deleteVideoAnalysis(selectedVideoId);
+      toast({
+        title: "Video Analysis Deleted",
+        description: "Video analysis has been removed from your records."
+      });
+      setIsDeleteVideoDialogOpen(false);
+    }
+  };
+  
   const sortedMatches = [...matchLogs].sort((a, b) => 
     new Date(b.date).getTime() - new Date(a.date).getTime()
   );
   
+  const sortedVideos = videoAnalyses ? [...videoAnalyses].sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  ) : [];
+  
   const selectedMatch = selectedMatchId ? matchLogs.find(m => m.id === selectedMatchId) : null;
+  const selectedVideo = selectedVideoId ? videoAnalyses?.find(v => v.id === selectedVideoId) : null;
 
   return (
     <Layout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight mb-2">Match Overview</h2>
+            <h2 className="text-3xl font-bold tracking-tight mb-2">Data Overview</h2>
             <p className="text-muted-foreground">
-              Central hub for all match data management ({matchLogs.length} matches)
+              Central hub for all match and video analysis data
             </p>
           </div>
-          <Button onClick={openAddDialog} className="gap-1">
-            <Plus size={16} />
-            Add Match
-          </Button>
+          <div className="flex gap-2">
+            {activeTab === "matches" && (
+              <Button onClick={openAddDialog} className="gap-1">
+                <Plus size={16} />
+                Add Match
+              </Button>
+            )}
+            {activeTab === "videos" && (
+              <Button asChild className="gap-1">
+                <Link to="/video-upload">
+                  <Plus size={16} />
+                  New Video Analysis
+                </Link>
+              </Button>
+            )}
+          </div>
         </div>
 
-        <div className="rounded-lg border">
-          <Table>
-            <TableCaption>All match records will automatically update statistics across the application</TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Home Team</TableHead>
-                <TableHead>Away Team</TableHead>
-                <TableHead className="text-center">Score</TableHead>
-                <TableHead className="text-center">
-                  <div className="flex items-center justify-center">
-                    <Save size={16} className="mr-1 text-keeper-blue" />
-                    <span>Saves</span>
-                  </div>
-                </TableHead>
-                <TableHead className="text-center">Clean Sheet</TableHead>
-                <TableHead>Venue</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedMatches.length > 0 ? (
-                sortedMatches.map((match) => {
-                  const isHomeGame = match.homeTeam === userSettings.clubTeam;
-                  const ourScore = isHomeGame ? match.homeScore : match.awayScore;
-                  const theirScore = isHomeGame ? match.awayScore : match.homeScore;
-                  const matchResult = ourScore > theirScore ? "win" : ourScore < theirScore ? "loss" : "draw";
-                  
-                  return (
-                    <TableRow key={match.id}>
-                      <TableCell>
-                        {new Date(match.date).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className={isHomeGame ? "font-medium" : ""}>
-                        {match.homeTeam}
-                      </TableCell>
-                      <TableCell className={!isHomeGame ? "font-medium" : ""}>
-                        {match.awayTeam}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className={
-                          matchResult === "win" 
-                            ? "text-keeper-green font-medium" 
-                            : matchResult === "loss" 
-                              ? "text-keeper-red font-medium" 
-                              : "font-medium"
-                        }>
-                          {match.homeScore} - {match.awayScore}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-center">{match.saves}</TableCell>
-                      <TableCell className="text-center">
-                        {match.cleanSheet ? "Yes" : "No"}
-                      </TableCell>
-                      <TableCell>{match.venue}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end space-x-1">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => openEditDialog(match.id)}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Edit className="h-4 w-4" />
-                            <span className="sr-only">Edit match</span>
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => openDeleteDialog(match.id)}
-                            className="h-8 w-8 p-0 text-red-500 hover:text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete match</span>
-                          </Button>
-                        </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-2 mb-4">
+            <TabsTrigger value="matches">Match Logs ({matchLogs.length})</TabsTrigger>
+            <TabsTrigger value="videos">Video Analysis ({videoAnalyses?.length || 0})</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="matches" className="space-y-4">
+            <div className="rounded-lg border">
+              <Table>
+                <TableCaption>All match records will automatically update statistics across the application</TableCaption>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Home Team</TableHead>
+                    <TableHead>Away Team</TableHead>
+                    <TableHead className="text-center">Score</TableHead>
+                    <TableHead className="text-center">
+                      <div className="flex items-center justify-center">
+                        <Save size={16} className="mr-1 text-keeper-blue" />
+                        <span>Saves</span>
+                      </div>
+                    </TableHead>
+                    <TableHead className="text-center">Clean Sheet</TableHead>
+                    <TableHead>Venue</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sortedMatches.length > 0 ? (
+                    sortedMatches.map((match) => {
+                      const isHomeGame = match.homeTeam === userSettings.clubTeam;
+                      const ourScore = isHomeGame ? match.homeScore : match.awayScore;
+                      const theirScore = isHomeGame ? match.awayScore : match.homeScore;
+                      const matchResult = ourScore > theirScore ? "win" : ourScore < theirScore ? "loss" : "draw";
+                      
+                      return (
+                        <TableRow key={match.id}>
+                          <TableCell>
+                            {new Date(match.date).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell className={isHomeGame ? "font-medium" : ""}>
+                            {match.homeTeam}
+                          </TableCell>
+                          <TableCell className={!isHomeGame ? "font-medium" : ""}>
+                            {match.awayTeam}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <span className={
+                              matchResult === "win" 
+                                ? "text-keeper-green font-medium" 
+                                : matchResult === "loss" 
+                                  ? "text-keeper-red font-medium" 
+                                  : "font-medium"
+                            }>
+                              {match.homeScore} - {match.awayScore}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-center">{match.saves}</TableCell>
+                          <TableCell className="text-center">
+                            {match.cleanSheet ? "Yes" : "No"}
+                          </TableCell>
+                          <TableCell>{match.venue}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end space-x-1">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => openEditDialog(match.id)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Edit className="h-4 w-4" />
+                                <span className="sr-only">Edit match</span>
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => openDeleteDialog(match.id)}
+                                className="h-8 w-8 p-0 text-red-500 hover:text-red-600"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Delete match</span>
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center py-8">
+                        No matches recorded yet. Add your first match to start tracking.
                       </TableCell>
                     </TableRow>
-                  );
-                })
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8">
-                    No matches recorded yet. Add your first match to start tracking.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="videos" className="space-y-4">
+            {sortedVideos.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {sortedVideos.map((video) => (
+                  <Card key={video.id} className="overflow-hidden">
+                    <CardHeader className="bg-muted/30">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="line-clamp-1">{video.title}</CardTitle>
+                          <CardDescription>
+                            {new Date(video.date).toLocaleDateString()}
+                          </CardDescription>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => openDeleteVideoDialog(video.id)}
+                          className="h-8 w-8 p-0 text-red-500 hover:text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Delete video</span>
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-4">
+                      {video.description && (
+                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{video.description}</p>
+                      )}
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-2">
+                          <ShieldCheck className="h-5 w-5 text-green-500" />
+                          <span className="font-semibold">{video.saves} saves</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <ShieldAlert className="h-5 w-5 text-red-500" />
+                          <span className="font-semibold">{video.goals} goals</span>
+                        </div>
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to="/video-upload">
+                            <Video className="h-4 w-4 mr-1" />
+                            View
+                          </Link>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 border rounded-lg bg-muted/10">
+                <Video className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium mb-2">No Video Analysis Yet</h3>
+                <p className="text-muted-foreground mb-6">Upload match videos to get AI analysis of your goalkeeping performance</p>
+                <Button asChild>
+                  <Link to="/video-upload">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Upload First Video
+                  </Link>
+                </Button>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
 
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogContent className="sm:max-w-md">
@@ -656,9 +770,45 @@ const MatchOverview = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        
+        <Dialog open={isDeleteVideoDialogOpen} onOpenChange={setIsDeleteVideoDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Video Analysis</DialogTitle>
+              <DialogDescription>
+                This will remove the video analysis from your records
+              </DialogDescription>
+            </DialogHeader>
+            
+            {selectedVideo && (
+              <div className="py-4">
+                <p className="font-medium">{selectedVideo.title}</p>
+                <p className="text-sm text-muted-foreground">
+                  {new Date(selectedVideo.date).toLocaleDateString()}
+                </p>
+                {selectedVideo.description && (
+                  <p className="text-sm mt-2">{selectedVideo.description}</p>
+                )}
+              </div>
+            )}
+            
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete this video analysis? This action cannot be undone.
+            </p>
+            
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setIsDeleteVideoDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteVideoAnalysis}>
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </Layout>
   );
 };
 
-export default MatchOverview;
+export default DataOverview;

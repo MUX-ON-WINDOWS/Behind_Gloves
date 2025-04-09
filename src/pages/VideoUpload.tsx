@@ -7,20 +7,28 @@ import { Progress } from "@/components/ui/progress";
 import { Upload, X, FileVideo, Loader2, ShieldCheck, ShieldAlert } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useDataStore } from "@/lib/data-store";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function VideoUpload() {
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [videoTitle, setVideoTitle] = useState("");
+  const [videoDescription, setVideoDescription] = useState("");
   const [videoStats, setVideoStats] = useState<{
     analysis: string;
     saves: { timestamp: string; description: string }[];
     goals: { timestamp: string; description: string }[];
     summary: string;
+    title?: string;
+    description?: string;
   } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { addVideoAnalysis } = useDataStore();
 
   const onDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -79,6 +87,15 @@ export default function VideoUpload() {
   const uploadVideo = async () => {
     if (!file) return;
     
+    if (!videoTitle.trim()) {
+      toast({
+        title: "Title Required",
+        description: "Please provide a title for your video analysis.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsUploading(true);
     setUploadProgress(0);
     
@@ -94,9 +111,6 @@ export default function VideoUpload() {
         });
       }, 300);
 
-      // For demonstration purposes - in a real app we'd send the video
-      // Here we're just simulating by sending a text question
-      
       // API URL with the actual API key
       const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyDF6Voc8Qoi_XTMbuUfKJzt0LnLBNXwDlI";
 
@@ -161,11 +175,24 @@ export default function VideoUpload() {
         analysis: responseText,
         saves,
         goals,
-        summary
+        summary,
+        title: videoTitle,
+        description: videoDescription
       };
       
       setVideoStats(processedStats);
       setUploadProgress(100);
+      
+      // Send the data to the data store for the Data Overview page
+      addVideoAnalysis({
+        id: Date.now().toString(),
+        date: new Date().toISOString(),
+        title: videoTitle,
+        description: videoDescription,
+        saves: saves.length,
+        goals: goals.length,
+        videoStats: processedStats
+      });
       
       toast({
         title: "Analysis complete",
@@ -216,6 +243,29 @@ export default function VideoUpload() {
               onChange={handleFileChange}
               className="hidden"
             />
+            
+            <div className="space-y-4 mb-4">
+              <div>
+                <Label htmlFor="video-title">Video Title</Label>
+                <Input 
+                  id="video-title" 
+                  placeholder="Enter a descriptive title for this video"
+                  value={videoTitle}
+                  onChange={(e) => setVideoTitle(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="video-description">Description (Optional)</Label>
+                <Textarea 
+                  id="video-description" 
+                  placeholder="Add details about this match or what you want to analyze"
+                  value={videoDescription}
+                  onChange={(e) => setVideoDescription(e.target.value)}
+                  rows={3}
+                />
+              </div>
+            </div>
             
             {!file ? (
               <div
@@ -268,7 +318,7 @@ export default function VideoUpload() {
                 ) : (
                   <Button 
                     onClick={uploadVideo}
-                    disabled={!file}
+                    disabled={!file || !videoTitle.trim()}
                     className="w-full"
                   >
                     {isUploading ? (
@@ -291,7 +341,10 @@ export default function VideoUpload() {
               <div className="mt-8 space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Performance Summary</CardTitle>
+                    <CardTitle>{videoStats.title || "Performance Summary"}</CardTitle>
+                    {videoStats.description && (
+                      <CardDescription>{videoStats.description}</CardDescription>
+                    )}
                   </CardHeader>
                   <CardContent>
                     <div className="text-center bg-muted/30 p-4 rounded-md">
