@@ -13,139 +13,159 @@ import {
   UserSettings
 } from '@/types/store-types';
 
+// Helper function for error handling
+const handleSupabaseError = (error: any, operation: string) => {
+  console.error(`Error ${operation}:`, error);
+  if (error?.message?.includes('JWT')) {
+    console.error('Authentication error - please check your Supabase API key');
+  }
+  throw error;
+};
+
 // Goals Conceded Data
 export async function fetchGoalsConcededData(): Promise<GoalsConcededDataPoint[]> {
-  const { data, error } = await supabase.from('GoalsConcededData').select('*');
-  if (error) {
-    console.error('Error fetching goals conceded data:', error);
-    return [];
+  console.log('Fetching goals conceded data...');
+  try {
+    const { data, error } = await supabase.from('GoalsConcededData').select('*');
+    if (error) throw error;
+    console.log('Fetched goals conceded data:', data);
+    return data || [];
+  } catch (error) {
+    return handleSupabaseError(error, 'fetching goals conceded data');
   }
-  return data;
 }
 
 export async function updateGoalsConcededData(data: GoalsConcededDataPoint[]): Promise<void> {
-  // First delete all existing entries
-  const { error: deleteError } = await supabase.from('GoalsConcededData').delete().neq('name', 'dummy_value');
-  if (deleteError) {
-    console.error('Error deleting goals conceded data:', deleteError);
-    return;
-  }
+  console.log('Updating goals conceded data:', data);
+  try {
+    // First delete all existing entries
+    const { error: deleteError } = await supabase.from('GoalsConcededData').delete().neq('name', 'dummy_value');
+    if (deleteError) throw deleteError;
 
-  // Then insert all new entries
-  if (data.length > 0) {
-    const { error: insertError } = await supabase.from('GoalsConcededData').insert(data);
-    if (insertError) {
-      console.error('Error updating goals conceded data:', insertError);
+    // Then insert all new entries
+    if (data.length > 0) {
+      const { error: insertError } = await supabase.from('GoalsConcededData').insert(data);
+      if (insertError) throw insertError;
     }
+    console.log('Goals conceded data updated successfully');
+  } catch (error) {
+    handleSupabaseError(error, 'updating goals conceded data');
   }
 }
 
 // Saves Made Data
 export async function fetchSavesMadeData(): Promise<SavesMadeDataPoint[]> {
-  const { data, error } = await supabase.from('SavesMadeData').select('*');
-  if (error) {
-    console.error('Error fetching saves made data:', error);
-    return [];
+  console.log('Fetching saves made data...');
+  try {
+    const { data, error } = await supabase.from('SavesMadeData').select('*');
+    if (error) throw error;
+    console.log('Fetched saves made data:', data);
+    return data || [];
+  } catch (error) {
+    return handleSupabaseError(error, 'fetching saves made data');
   }
-  return data;
 }
 
 export async function updateSavesMadeData(data: SavesMadeDataPoint[]): Promise<void> {
-  // First delete all existing entries
-  const { error: deleteError } = await supabase.from('SavesMadeData').delete().neq('name', 'dummy_value');
-  if (deleteError) {
-    console.error('Error deleting saves made data:', deleteError);
-    return;
-  }
+  console.log('Updating saves made data:', data);
+  try {
+    // First delete all existing entries
+    const { error: deleteError } = await supabase.from('SavesMadeData').delete().neq('name', 'dummy_value');
+    if (deleteError) throw deleteError;
 
-  // Then insert all new entries
-  if (data.length > 0) {
-    const { error: insertError } = await supabase.from('SavesMadeData').insert(data);
-    if (insertError) {
-      console.error('Error updating saves made data:', insertError);
+    // Then insert all new entries
+    if (data.length > 0) {
+      const { error: insertError } = await supabase.from('SavesMadeData').insert(data);
+      if (insertError) throw insertError;
     }
+    console.log('Saves made data updated successfully');
+  } catch (error) {
+    handleSupabaseError(error, 'updating saves made data');
   }
 }
 
 // Shot Position Data
 export async function fetchShotPositionData(): Promise<ShotPositionDataPoint[]> {
-  const { data, error } = await supabase.from('ShotPositionData').select('*');
-  if (error) {
-    console.error('Error fetching shot position data:', error);
-    return [];
+  console.log('Fetching shot position data...');
+  try {
+    const { data, error } = await supabase.from('ShotPositionData').select('*');
+    if (error) throw error;
+    console.log('Fetched shot position data:', data);
+    return data || [];
+  } catch (error) {
+    return handleSupabaseError(error, 'fetching shot position data');
   }
-  return data;
 }
 
 export async function updateShotPositionData(data: ShotPositionDataPoint[]): Promise<void> {
-  // First delete all existing entries
-  const { error: deleteError } = await supabase.from('ShotPositionData').delete().neq('name', 'dummy_value');
-  if (deleteError) {
-    console.error('Error deleting shot position data:', deleteError);
-    return;
-  }
+  console.log('Updating shot position data:', data);
+  try {
+    // First delete all existing entries
+    const { error: deleteError } = await supabase.from('ShotPositionData').delete().neq('name', 'dummy_value');
+    if (deleteError) throw deleteError;
 
-  // Then insert all new entries
-  if (data.length > 0) {
-    const { error: insertError } = await supabase.from('ShotPositionData').insert(data);
-    if (insertError) {
-      console.error('Error updating shot position data:', insertError);
+    // Then insert all new entries
+    if (data.length > 0) {
+      const { error: insertError } = await supabase.from('ShotPositionData').insert(data);
+      if (insertError) throw insertError;
     }
+    console.log('Shot position data updated successfully');
+  } catch (error) {
+    handleSupabaseError(error, 'updating shot position data');
   }
 }
 
 // Performance Summary
 export async function fetchPerformanceSummary(): Promise<PerformanceSummary> {
-  const { data, error } = await supabase.from('PerformanceSummary').select('*').order('id', { ascending: false }).limit(1);
-  if (error) {
-    console.error('Error fetching performance summary:', error);
-    return {
+  console.log('Fetching performance summary...');
+  try {
+    const { data, error } = await supabase.from('PerformanceSummary').select('*').order('id', { ascending: false }).limit(1);
+    if (error) throw error;
+    console.log('Fetched performance summary:', data);
+    return data[0] || {
       matches: 0,
       totalSaves: 0,
       totalGoalsConceded: 0,
       cleanSheets: 0,
       savePercentage: 0
     };
+  } catch (error) {
+    return handleSupabaseError(error, 'fetching performance summary');
   }
-  return data[0] || {
-    matches: 0,
-    totalSaves: 0,
-    totalGoalsConceded: 0,
-    cleanSheets: 0,
-    savePercentage: 0
-  };
 }
 
 export async function updatePerformanceSummary(summary: PerformanceSummary): Promise<void> {
-  // Check if any record exists
-  const { data, error: checkError } = await supabase.from('PerformanceSummary').select('id').limit(1);
-  
-  if (checkError) {
-    console.error('Error checking performance summary:', checkError);
-    return;
-  }
-  
-  if (data && data.length > 0) {
-    // Update existing record
-    const { error } = await supabase.from('PerformanceSummary').update(summary).eq('id', data[0].id);
-    if (error) {
-      console.error('Error updating performance summary:', error);
+  console.log('Updating performance summary:', summary);
+  try {
+    // Check if any record exists
+    const { data, error: checkError } = await supabase.from('PerformanceSummary').select('id').limit(1);
+    
+    if (checkError) throw checkError;
+    
+    if (data && data.length > 0) {
+      // Update existing record
+      const { error } = await supabase.from('PerformanceSummary').update(summary).eq('id', data[0].id);
+      if (error) throw error;
+    } else {
+      // Insert new record
+      const { error } = await supabase.from('PerformanceSummary').insert(summary);
+      if (error) throw error;
     }
-  } else {
-    // Insert new record
-    const { error } = await supabase.from('PerformanceSummary').insert(summary);
-    if (error) {
-      console.error('Error inserting performance summary:', error);
-    }
+    console.log('Performance summary updated successfully');
+  } catch (error) {
+    handleSupabaseError(error, 'updating performance summary');
   }
 }
 
 // Last Match
 export async function fetchLastMatch(): Promise<LastMatch> {
-  const { data, error } = await supabase.from('LastMatch').select('*').order('id', { ascending: false }).limit(1);
-  if (error) {
-    console.error('Error fetching last match:', error);
-    return {
+  console.log('Fetching last match...');
+  try {
+    const { data, error } = await supabase.from('LastMatch').select('*').order('id', { ascending: false }).limit(1);
+    if (error) throw error;
+    console.log('Fetched last match:', data);
+    
+    const lastMatch = data[0] || {
       homeTeam: '',
       homeScore: 0,
       awayTeam: '',
@@ -155,56 +175,49 @@ export async function fetchLastMatch(): Promise<LastMatch> {
       cleanSheet: false,
       saves: 0
     };
+    
+    // Convert the date to string format if it's a Date object
+    return {
+      ...lastMatch,
+      date: lastMatch.date ? new Date(lastMatch.date).toISOString() : ''
+    };
+  } catch (error) {
+    return handleSupabaseError(error, 'fetching last match');
   }
-  
-  const lastMatch = data[0] || {
-    homeTeam: '',
-    homeScore: 0,
-    awayTeam: '',
-    awayScore: 0,
-    date: '',
-    venue: '',
-    cleanSheet: false,
-    saves: 0
-  };
-  
-  // Convert the date to string format if it's a Date object
-  return {
-    ...lastMatch,
-    date: lastMatch.date ? new Date(lastMatch.date).toISOString() : ''
-  };
 }
 
 export async function updateLastMatch(match: LastMatch): Promise<void> {
-  // Check if any record exists
-  const { data, error: checkError } = await supabase.from('LastMatch').select('id').limit(1);
-  
-  if (checkError) {
-    console.error('Error checking last match:', checkError);
-    return;
-  }
-  
-  if (data && data.length > 0) {
-    // Update existing record
-    const { error } = await supabase.from('LastMatch').update(match).eq('id', data[0].id);
-    if (error) {
-      console.error('Error updating last match:', error);
+  console.log('Updating last match:', match);
+  try {
+    // Check if any record exists
+    const { data, error: checkError } = await supabase.from('LastMatch').select('id').limit(1);
+    
+    if (checkError) throw checkError;
+    
+    if (data && data.length > 0) {
+      // Update existing record
+      const { error } = await supabase.from('LastMatch').update(match).eq('id', data[0].id);
+      if (error) throw error;
+    } else {
+      // Insert new record
+      const { error } = await supabase.from('LastMatch').insert(match);
+      if (error) throw error;
     }
-  } else {
-    // Insert new record
-    const { error } = await supabase.from('LastMatch').insert(match);
-    if (error) {
-      console.error('Error inserting last match:', error);
-    }
+    console.log('Last match updated successfully');
+  } catch (error) {
+    handleSupabaseError(error, 'updating last match');
   }
 }
 
 // Upcoming Match
 export async function fetchUpcomingMatch(): Promise<UpcomingMatch> {
-  const { data, error } = await supabase.from('UpcomingMatch').select('*').order('id', { ascending: false }).limit(1);
-  if (error) {
-    console.error('Error fetching upcoming match:', error);
-    return {
+  console.log('Fetching upcoming match...');
+  try {
+    const { data, error } = await supabase.from('UpcomingMatch').select('*').order('id', { ascending: false }).limit(1);
+    if (error) throw error;
+    console.log('Fetched upcoming match:', data);
+    
+    const upcomingMatch = data[0] || {
       homeTeam: '',
       awayTeam: '',
       date: '',
@@ -212,282 +225,320 @@ export async function fetchUpcomingMatch(): Promise<UpcomingMatch> {
       venue: '',
       competition: ''
     };
+    
+    // Convert the date to string format if it's a Date object
+    return {
+      ...upcomingMatch,
+      date: upcomingMatch.date ? new Date(upcomingMatch.date).toISOString() : '',
+      time: upcomingMatch.time || '' // Ensure time is a string
+    };
+  } catch (error) {
+    return handleSupabaseError(error, 'fetching upcoming match');
   }
-  
-  const upcomingMatch = data[0] || {
-    homeTeam: '',
-    awayTeam: '',
-    date: '',
-    time: '',
-    venue: '',
-    competition: ''
-  };
-  
-  // Convert the date to string format if it's a Date object
-  return {
-    ...upcomingMatch,
-    date: upcomingMatch.date ? new Date(upcomingMatch.date).toISOString() : '',
-    time: upcomingMatch.time || '' // Ensure time is a string
-  };
 }
 
 export async function updateUpcomingMatch(match: UpcomingMatch): Promise<void> {
-  // Check if any record exists
-  const { data, error: checkError } = await supabase.from('UpcomingMatch').select('id').limit(1);
-  
-  if (checkError) {
-    console.error('Error checking upcoming match:', checkError);
-    return;
-  }
-  
-  if (data && data.length > 0) {
-    // Update existing record
-    const { error } = await supabase.from('UpcomingMatch').update(match).eq('id', data[0].id);
-    if (error) {
-      console.error('Error updating upcoming match:', error);
+  console.log('Updating upcoming match:', match);
+  try {
+    // Check if any record exists
+    const { data, error: checkError } = await supabase.from('UpcomingMatch').select('id').limit(1);
+    
+    if (checkError) throw checkError;
+    
+    if (data && data.length > 0) {
+      // Update existing record
+      const { error } = await supabase.from('UpcomingMatch').update(match).eq('id', data[0].id);
+      if (error) throw error;
+    } else {
+      // Insert new record
+      const { error } = await supabase.from('UpcomingMatch').insert(match);
+      if (error) throw error;
     }
-  } else {
-    // Insert new record
-    const { error } = await supabase.from('UpcomingMatch').insert(match);
-    if (error) {
-      console.error('Error inserting upcoming match:', error);
-    }
+    console.log('Upcoming match updated successfully');
+  } catch (error) {
+    handleSupabaseError(error, 'updating upcoming match');
   }
 }
 
 // Team Scoreboard
 export async function fetchTeamScoreboard(): Promise<TeamData[]> {
-  const { data, error } = await supabase.from('TeamScoreboard').select('*').order('position', { ascending: true });
-  if (error) {
-    console.error('Error fetching team scoreboard:', error);
-    return [];
+  console.log('Fetching team scoreboard...');
+  try {
+    const { data, error } = await supabase.from('TeamScoreboard').select('*').order('position', { ascending: true });
+    if (error) throw error;
+    console.log('Fetched team scoreboard:', data);
+    return data || [];
+  } catch (error) {
+    return handleSupabaseError(error, 'fetching team scoreboard');
   }
-  return data;
 }
 
 export async function updateTeamScoreboard(teams: TeamData[]): Promise<void> {
-  // First delete all existing entries
-  const { error: deleteError } = await supabase.from('TeamScoreboard').delete().neq('team', 'dummy_value');
-  if (deleteError) {
-    console.error('Error deleting team scoreboard data:', deleteError);
-    return;
-  }
+  console.log('Updating team scoreboard:', teams);
+  try {
+    // First delete all existing entries
+    const { error: deleteError } = await supabase.from('TeamScoreboard').delete().neq('team', 'dummy_value');
+    if (deleteError) throw deleteError;
 
-  // Then insert all new entries
-  if (teams.length > 0) {
-    const { error: insertError } = await supabase.from('TeamScoreboard').insert(teams);
-    if (insertError) {
-      console.error('Error updating team scoreboard data:', insertError);
+    // Then insert all new entries
+    if (teams.length > 0) {
+      const { error: insertError } = await supabase.from('TeamScoreboard').insert(teams);
+      if (insertError) throw insertError;
     }
+    console.log('Team scoreboard updated successfully');
+  } catch (error) {
+    handleSupabaseError(error, 'updating team scoreboard');
   }
 }
 
 // Match Logs
 export async function fetchMatchLogs(): Promise<MatchLog[]> {
-  const { data, error } = await supabase.from('MatchLog').select('*').order('date', { ascending: false });
-  if (error) {
-    console.error('Error fetching match logs:', error);
-    return [];
+  console.log('Fetching match logs...');
+  try {
+    const { data, error } = await supabase.from('MatchLog').select('*').order('date', { ascending: false });
+    if (error) throw error;
+    console.log('Fetched match logs:', data);
+    // Convert dates to string format
+    return (data || []).map(match => ({
+      ...match,
+      date: match.date ? new Date(match.date).toISOString() : ''
+    }));
+  } catch (error) {
+    return handleSupabaseError(error, 'fetching match logs');
   }
-  // Convert dates to string format
-  return data.map(match => ({
-    ...match,
-    date: match.date ? new Date(match.date).toISOString() : ''
-  }));
 }
 
 export async function addMatchLog(match: Omit<MatchLog, 'id'>): Promise<string | null> {
-  const newId = crypto.randomUUID();
-  const newMatch = { ...match, id: newId };
-  
-  const { error } = await supabase.from('MatchLog').insert(newMatch);
-  if (error) {
-    console.error('Error adding match log:', error);
+  console.log('Adding match log:', match);
+  try {
+    const newId = crypto.randomUUID();
+    const newMatch = { ...match, id: newId };
+    
+    const { error } = await supabase.from('MatchLog').insert(newMatch);
+    if (error) throw error;
+    console.log('Match log added successfully with ID:', newId);
+    return newId;
+  } catch (error) {
+    handleSupabaseError(error, 'adding match log');
     return null;
   }
-  return newId;
 }
 
 export async function updateMatchLog(id: string, match: Partial<MatchLog>): Promise<void> {
-  const { error } = await supabase.from('MatchLog').update(match).eq('id', id);
-  if (error) {
-    console.error('Error updating match log:', error);
+  console.log('Updating match log:', id, match);
+  try {
+    const { error } = await supabase.from('MatchLog').update(match).eq('id', id);
+    if (error) throw error;
+    console.log('Match log updated successfully');
+  } catch (error) {
+    handleSupabaseError(error, 'updating match log');
   }
 }
 
 export async function deleteMatchLog(id: string): Promise<void> {
-  const { error } = await supabase.from('MatchLog').delete().eq('id', id);
-  if (error) {
-    console.error('Error deleting match log:', error);
+  console.log('Deleting match log:', id);
+  try {
+    const { error } = await supabase.from('MatchLog').delete().eq('id', id);
+    if (error) throw error;
+    console.log('Match log deleted successfully');
+  } catch (error) {
+    handleSupabaseError(error, 'deleting match log');
   }
 }
 
 // Video Analysis
 export async function fetchVideoAnalyses(): Promise<VideoAnalysis[]> {
-  // First fetch the main video analysis data
-  const { data: videoData, error: videoError } = await supabase
-    .from('VideoAnalysis')
-    .select('*')
-    .order('date', { ascending: false });
-    
-  if (videoError) {
-    console.error('Error fetching video analyses:', videoError);
-    return [];
-  }
-  
-  // For each video, fetch its saves and goals timestamps
-  const videosWithDetails = await Promise.all(videoData.map(async (video) => {
-    // Fetch saves
-    const { data: savesData, error: savesError } = await supabase
-      .from('VideoSaves')
+  console.log('Fetching video analyses...');
+  try {
+    // First fetch the main video analysis data
+    const { data: videoData, error: videoError } = await supabase
+      .from('VideoAnalysis')
       .select('*')
-      .eq('videoId', video.id);
+      .order('date', { ascending: false });
       
-    if (savesError) {
-      console.error(`Error fetching saves for video ${video.id}:`, savesError);
+    if (videoError) throw videoError;
+    console.log('Fetched video analyses:', videoData);
+    
+    if (!videoData || videoData.length === 0) {
+      return [];
     }
     
-    // Fetch goals
-    const { data: goalsData, error: goalsError } = await supabase
-      .from('VideoGoals')
-      .select('*')
-      .eq('videoId', video.id);
-      
-    if (goalsError) {
-      console.error(`Error fetching goals for video ${video.id}:`, goalsError);
-    }
-    
-    // Construct the full video analysis object
-    return {
-      id: video.id,
-      date: video.date ? new Date(video.date).toISOString() : '',
-      title: video.title || '',
-      description: video.description || '',
-      saves: video.saves || 0,
-      goals: video.goals || 0,
-      videoStats: {
-        analysis: video.analysis || '',
-        summary: video.summary || '',
-        title: video.videoTitle || video.title || '',
-        description: video.videoDescription || video.description || '',
-        saves: (savesData || []).map(save => ({
-          timestamp: save.timestamp,
-          description: save.description
-        })),
-        goals: (goalsData || []).map(goal => ({
-          timestamp: goal.timestamp,
-          description: goal.description
-        }))
+    // For each video, fetch its saves and goals timestamps
+    const videosWithDetails = await Promise.all(videoData.map(async (video) => {
+      try {
+        // Fetch saves
+        const { data: savesData, error: savesError } = await supabase
+          .from('VideoSaves')
+          .select('*')
+          .eq('videoId', video.id);
+          
+        if (savesError) throw savesError;
+        
+        // Fetch goals
+        const { data: goalsData, error: goalsError } = await supabase
+          .from('VideoGoals')
+          .select('*')
+          .eq('videoId', video.id);
+          
+        if (goalsError) throw goalsError;
+        
+        // Construct the full video analysis object
+        return {
+          id: video.id,
+          date: video.date ? new Date(video.date).toISOString() : '',
+          title: video.title || '',
+          description: video.description || '',
+          saves: video.saves || 0,
+          goals: video.goals || 0,
+          videoStats: {
+            analysis: video.analysis || '',
+            summary: video.summary || '',
+            title: video.videoTitle || video.title || '',
+            description: video.videoDescription || video.description || '',
+            saves: (savesData || []).map(save => ({
+              timestamp: save.timestamp,
+              description: save.description
+            })),
+            goals: (goalsData || []).map(goal => ({
+              timestamp: goal.timestamp,
+              description: goal.description
+            }))
+          }
+        };
+      } catch (error) {
+        console.error(`Error fetching details for video ${video.id}:`, error);
+        // Return basic video info without details in case of error
+        return {
+          id: video.id,
+          date: video.date ? new Date(video.date).toISOString() : '',
+          title: video.title || '',
+          description: video.description || '',
+          saves: video.saves || 0,
+          goals: video.goals || 0,
+          videoStats: {
+            analysis: video.analysis || '',
+            summary: video.summary || '',
+            title: video.videoTitle || video.title || '',
+            description: video.videoDescription || video.description || '',
+            saves: [],
+            goals: []
+          }
+        };
       }
-    };
-  }));
-  
-  return videosWithDetails;
+    }));
+    
+    return videosWithDetails;
+  } catch (error) {
+    return handleSupabaseError(error, 'fetching video analyses');
+  }
 }
 
 export async function addVideoAnalysis(video: Omit<VideoAnalysis, 'id'>): Promise<string | null> {
-  // Generate a new UUID for the video
-  const newId = crypto.randomUUID();
-  
-  // Insert the main video record
-  const { error: videoError } = await supabase.from('VideoAnalysis').insert({
-    id: newId,
-    date: video.date,
-    title: video.title,
-    description: video.description,
-    saves: video.saves,
-    goals: video.goals,
-    analysis: video.videoStats.analysis,
-    summary: video.videoStats.summary,
-    videoTitle: video.videoStats.title,
-    videoDescription: video.videoStats.description
-  });
-  
-  if (videoError) {
-    console.error('Error adding video analysis:', videoError);
+  console.log('Adding video analysis:', video);
+  try {
+    // Generate a new UUID for the video
+    const newId = crypto.randomUUID();
+    
+    // Insert the main video record
+    const { error: videoError } = await supabase.from('VideoAnalysis').insert({
+      id: newId,
+      date: video.date,
+      title: video.title,
+      description: video.description,
+      saves: video.saves,
+      goals: video.goals,
+      analysis: video.videoStats.analysis,
+      summary: video.videoStats.summary,
+      videoTitle: video.videoStats.title,
+      videoDescription: video.videoStats.description
+    });
+    
+    if (videoError) throw videoError;
+    
+    // Insert save timestamps if any
+    if (video.videoStats.saves && video.videoStats.saves.length > 0) {
+      const saveRecords = video.videoStats.saves.map(save => ({
+        videoId: newId,
+        timestamp: save.timestamp,
+        description: save.description
+      }));
+      
+      const { error: savesError } = await supabase.from('VideoSaves').insert(saveRecords);
+      if (savesError) throw savesError;
+    }
+    
+    // Insert goal timestamps if any
+    if (video.videoStats.goals && video.videoStats.goals.length > 0) {
+      const goalRecords = video.videoStats.goals.map(goal => ({
+        videoId: newId,
+        timestamp: goal.timestamp,
+        description: goal.description
+      }));
+      
+      const { error: goalsError } = await supabase.from('VideoGoals').insert(goalRecords);
+      if (goalsError) throw goalsError;
+    }
+    
+    console.log('Video analysis added successfully with ID:', newId);
+    return newId;
+  } catch (error) {
+    handleSupabaseError(error, 'adding video analysis');
     return null;
   }
-  
-  // Insert save timestamps if any
-  if (video.videoStats.saves && video.videoStats.saves.length > 0) {
-    const saveRecords = video.videoStats.saves.map(save => ({
-      videoId: newId,
-      timestamp: save.timestamp,
-      description: save.description
-    }));
-    
-    const { error: savesError } = await supabase.from('VideoSaves').insert(saveRecords);
-    if (savesError) {
-      console.error('Error adding video saves:', savesError);
-    }
-  }
-  
-  // Insert goal timestamps if any
-  if (video.videoStats.goals && video.videoStats.goals.length > 0) {
-    const goalRecords = video.videoStats.goals.map(goal => ({
-      videoId: newId,
-      timestamp: goal.timestamp,
-      description: goal.description
-    }));
-    
-    const { error: goalsError } = await supabase.from('VideoGoals').insert(goalRecords);
-    if (goalsError) {
-      console.error('Error adding video goals:', goalsError);
-    }
-  }
-  
-  return newId;
 }
 
 export async function deleteVideoAnalysis(id: string): Promise<void> {
-  // First delete related saves and goals (due to foreign key constraints)
-  const { error: savesError } = await supabase.from('VideoSaves').delete().eq('videoId', id);
-  if (savesError) {
-    console.error('Error deleting video saves:', savesError);
-  }
-  
-  const { error: goalsError } = await supabase.from('VideoGoals').delete().eq('videoId', id);
-  if (goalsError) {
-    console.error('Error deleting video goals:', goalsError);
-  }
-  
-  // Then delete the main video record
-  const { error: videoError } = await supabase.from('VideoAnalysis').delete().eq('id', id);
-  if (videoError) {
-    console.error('Error deleting video analysis:', videoError);
+  console.log('Deleting video analysis:', id);
+  try {
+    // First delete related saves and goals (due to foreign key constraints)
+    const { error: savesError } = await supabase.from('VideoSaves').delete().eq('videoId', id);
+    if (savesError) throw savesError;
+    
+    const { error: goalsError } = await supabase.from('VideoGoals').delete().eq('videoId', id);
+    if (goalsError) throw goalsError;
+    
+    // Then delete the main video record
+    const { error: videoError } = await supabase.from('VideoAnalysis').delete().eq('id', id);
+    if (videoError) throw videoError;
+    
+    console.log('Video analysis deleted successfully');
+  } catch (error) {
+    handleSupabaseError(error, 'deleting video analysis');
   }
 }
 
 // User Settings
 export async function fetchUserSettings(): Promise<UserSettings> {
-  const { data, error } = await supabase.from('UserSettings').select('*').order('id', { ascending: false }).limit(1);
-  if (error) {
-    console.error('Error fetching user settings:', error);
-    return { clubTeam: 'VV Dongen' };
+  console.log('Fetching user settings...');
+  try {
+    const { data, error } = await supabase.from('UserSettings').select('*').order('id', { ascending: false }).limit(1);
+    if (error) throw error;
+    console.log('Fetched user settings:', data);
+    return data[0] || { clubTeam: 'VV Dongen' };
+  } catch (error) {
+    return handleSupabaseError(error, 'fetching user settings');
   }
-  return data[0] || { clubTeam: 'VV Dongen' };
 }
 
 export async function updateUserSettings(settings: UserSettings): Promise<void> {
-  // Check if any record exists
-  const { data, error: checkError } = await supabase.from('UserSettings').select('id').limit(1);
-  
-  if (checkError) {
-    console.error('Error checking user settings:', checkError);
-    return;
-  }
-  
-  if (data && data.length > 0) {
-    // Update existing record
-    const { error } = await supabase.from('UserSettings').update(settings).eq('id', data[0].id);
-    if (error) {
-      console.error('Error updating user settings:', error);
+  console.log('Updating user settings:', settings);
+  try {
+    // Check if any record exists
+    const { data, error: checkError } = await supabase.from('UserSettings').select('id').limit(1);
+    
+    if (checkError) throw checkError;
+    
+    if (data && data.length > 0) {
+      // Update existing record
+      const { error } = await supabase.from('UserSettings').update(settings).eq('id', data[0].id);
+      if (error) throw error;
+    } else {
+      // Insert new record
+      const { error } = await supabase.from('UserSettings').insert(settings);
+      if (error) throw error;
     }
-  } else {
-    // Insert new record
-    const { error } = await supabase.from('UserSettings').insert(settings);
-    if (error) {
-      console.error('Error inserting user settings:', error);
-    }
+    console.log('User settings updated successfully');
+  } catch (error) {
+    handleSupabaseError(error, 'updating user settings');
   }
 }

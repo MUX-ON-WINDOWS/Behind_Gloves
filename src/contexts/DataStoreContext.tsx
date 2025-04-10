@@ -11,6 +11,8 @@ import {
   updateTeamScoreboard,
   calculateChartData
 } from '@/utils/performance-calculator';
+import { useToast } from '@/hooks/use-toast';
+import { checkSupabaseConnection } from '@/lib/supabase';
 
 // Create the context
 export const DataStoreContext = createContext<DataStoreContextType | undefined>(undefined);
@@ -23,8 +25,29 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
   const performanceState = usePerformanceState();
   const matchState = useMatchState();
   const userSettingsState = useUserSettings();
+  const { toast } = useToast();
   
   const [isLoading, setIsLoading] = useState(true);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
+  
+  // Check database connection on mount
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const isConnected = await checkSupabaseConnection();
+        if (!isConnected) {
+          setConnectionError('Unable to connect to the database');
+        } else {
+          setConnectionError(null);
+        }
+      } catch (error) {
+        console.error('Database connection check failed:', error);
+        setConnectionError('Error checking database connection');
+      }
+    };
+    
+    checkConnection();
+  }, []);
   
   // Extract properties from state for clarity
   const { matchLogs } = matchLogState;
@@ -49,37 +72,55 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
 
   // Recalculate performance statistics whenever match logs or club team changes
   const recalculatePerformanceSummary = async () => {
-    const stats = calculatePerformanceSummary(matchLogs, userSettings);
-    
-    // Update performance summary
-    await performanceState.setPerformanceSummary({
-      matches: stats.matches,
-      totalSaves: stats.totalSaves,
-      totalGoalsConceded: stats.totalGoalsConceded,
-      cleanSheets: stats.cleanSheets,
-      savePercentage: stats.savePercentage
-    });
-    
-    // Update team scoreboard
-    const updatedTeamScoreboard = updateTeamScoreboard(
-      matchState.teamScoreboard, 
-      userSettings, 
-      matchLogs, 
-      stats
-    );
-    
-    await matchState.setTeamScoreboard(updatedTeamScoreboard);
+    try {
+      const stats = calculatePerformanceSummary(matchLogs, userSettings);
+      
+      // Update performance summary
+      await performanceState.setPerformanceSummary({
+        matches: stats.matches,
+        totalSaves: stats.totalSaves,
+        totalGoalsConceded: stats.totalGoalsConceded,
+        cleanSheets: stats.cleanSheets,
+        savePercentage: stats.savePercentage
+      });
+      
+      // Update team scoreboard
+      const updatedTeamScoreboard = updateTeamScoreboard(
+        matchState.teamScoreboard, 
+        userSettings, 
+        matchLogs, 
+        stats
+      );
+      
+      await matchState.setTeamScoreboard(updatedTeamScoreboard);
+    } catch (error) {
+      console.error('Failed to recalculate performance summary:', error);
+      toast({
+        variant: "destructive",
+        title: "Update failed",
+        description: "Failed to update performance statistics"
+      });
+    }
   };
   
   // Update chart data based on match logs
   const updateChartData = async () => {
     if (matchLogs.length > 0) {
-      const { goalsConcededData, savesMadeData } = calculateChartData(matchLogs, userSettings);
-      
-      await Promise.all([
-        performanceState.setGoalsConcededData(goalsConcededData),
-        performanceState.setSavesMadeData(savesMadeData)
-      ]);
+      try {
+        const { goalsConcededData, savesMadeData } = calculateChartData(matchLogs, userSettings);
+        
+        await Promise.all([
+          performanceState.setGoalsConcededData(goalsConcededData),
+          performanceState.setSavesMadeData(savesMadeData)
+        ]);
+      } catch (error) {
+        console.error('Failed to update chart data:', error);
+        toast({
+          variant: "destructive",
+          title: "Update failed",
+          description: "Failed to update chart data"
+        });
+      }
     }
   };
   
@@ -128,10 +169,30 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
         setUserSettings: userSettingsState.setUserSettings,
         recalculatePerformanceSummary,
         ...videoAnalysisState,
-        isLoading
+        isLoading,
+        connectionError
       }}
     >
-      {children}
+      {connectionError && !isLoading ? (
+        <div className="flex items-center justify-center min-h-screen bg-background">
+          {import('./DatabaseConnectionError').then(module => (
+            <module.DatabaseConnectionError />
+          )).catch(() => (
+            <div className="text-center p-4">
+              <h1 className="text-xl font-bold">Database Connection Error</h1>
+              <p className="text-muted-foreground mt-2">Unable to connect to the database.</p>
+              <Button 
+                onClick={() => window.location.reload()} 
+                className="mt-4"
+              >
+                Retry
+              </Button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        children
+      )}
     </DataStoreContext.Provider>
   );
 };
