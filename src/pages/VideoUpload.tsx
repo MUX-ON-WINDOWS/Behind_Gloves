@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useRef } from "react";
 import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -185,7 +184,6 @@ export default function VideoUpload() {
       
       // Send the data to the data store for the Data Overview page
       addVideoAnalysis({
-        id: Date.now().toString(),
         date: new Date().toISOString(),
         title: videoTitle,
         description: videoDescription,
