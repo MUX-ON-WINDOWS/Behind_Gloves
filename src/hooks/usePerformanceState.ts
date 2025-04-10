@@ -6,61 +6,74 @@ import {
   ShotPositionDataPoint,
   PerformanceSummary
 } from '@/types/store-types';
-import { LOCAL_STORAGE_KEYS } from '@/constants/storage-keys';
-import { 
-  goalsConcededData as initialGoalsConcededData, 
-  savesMadeData as initialSavesMadeData, 
-  shotPositionData as initialShotPositionData,
-  performanceSummary as initialPerformanceSummary
-} from '@/lib/chart-data';
+import {
+  fetchGoalsConcededData, updateGoalsConcededData,
+  fetchSavesMadeData, updateSavesMadeData,
+  fetchShotPositionData, updateShotPositionData,
+  fetchPerformanceSummary, updatePerformanceSummary
+} from '@/services/database';
 
 export const usePerformanceState = () => {
-  const [goalsConcededData, setGoalsConcededData] = useState<GoalsConcededDataPoint[]>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.GOALS_CONCEDED);
-    return saved ? JSON.parse(saved) : initialGoalsConcededData;
+  const [goalsConcededData, setGoalsConcededDataState] = useState<GoalsConcededDataPoint[]>([]);
+  const [savesMadeData, setSavesMadeDataState] = useState<SavesMadeDataPoint[]>([]);
+  const [shotPositionData, setShotPositionDataState] = useState<ShotPositionDataPoint[]>([]);
+  const [performanceSummary, setPerformanceSummaryState] = useState<PerformanceSummary>({
+    matches: 0,
+    totalSaves: 0,
+    totalGoalsConceded: 0,
+    cleanSheets: 0,
+    savePercentage: 0
   });
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [savesMadeData, setSavesMadeData] = useState<SavesMadeDataPoint[]>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.SAVES_MADE);
-    return saved ? JSON.parse(saved) : initialSavesMadeData;
-  });
-
-  const [shotPositionData, setShotPositionData] = useState<ShotPositionDataPoint[]>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.SHOT_POSITION);
-    return saved ? JSON.parse(saved) : initialShotPositionData;
-  });
-
-  const [performanceSummary, setPerformanceSummary] = useState<PerformanceSummary>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.PERFORMANCE_SUMMARY);
-    const loadedSummary = saved ? JSON.parse(saved) : initialPerformanceSummary;
+  // Load data from Supabase on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      
+      const [
+        goalsConcededResult, 
+        savesMadeResult, 
+        shotPositionResult, 
+        performanceSummaryResult
+      ] = await Promise.all([
+        fetchGoalsConcededData(),
+        fetchSavesMadeData(),
+        fetchShotPositionData(),
+        fetchPerformanceSummary()
+      ]);
+      
+      setGoalsConcededDataState(goalsConcededResult);
+      setSavesMadeDataState(savesMadeResult);
+      setShotPositionDataState(shotPositionResult);
+      setPerformanceSummaryState(performanceSummaryResult);
+      
+      setIsLoading(false);
+    };
     
-    // If we have match logs, make sure performance summary matches the number of logs
-    const savedLogs = localStorage.getItem(LOCAL_STORAGE_KEYS.MATCH_LOGS);
-    if (savedLogs) {
-      const parsedLogs = JSON.parse(savedLogs);
-      if (parsedLogs.length !== loadedSummary.matches) {
-        loadedSummary.matches = parsedLogs.length;
-      }
-    }
-    
-    return loadedSummary;
-  });
+    loadData();
+  }, []);
 
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEYS.GOALS_CONCEDED, JSON.stringify(goalsConcededData));
-  }, [goalsConcededData]);
+  // Custom setters that update Supabase
+  const setGoalsConcededData = async (data: GoalsConcededDataPoint[]) => {
+    setGoalsConcededDataState(data);
+    await updateGoalsConcededData(data);
+  };
 
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEYS.SAVES_MADE, JSON.stringify(savesMadeData));
-  }, [savesMadeData]);
+  const setSavesMadeData = async (data: SavesMadeDataPoint[]) => {
+    setSavesMadeDataState(data);
+    await updateSavesMadeData(data);
+  };
 
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEYS.SHOT_POSITION, JSON.stringify(shotPositionData));
-  }, [shotPositionData]);
+  const setShotPositionData = async (data: ShotPositionDataPoint[]) => {
+    setShotPositionDataState(data);
+    await updateShotPositionData(data);
+  };
 
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEYS.PERFORMANCE_SUMMARY, JSON.stringify(performanceSummary));
-  }, [performanceSummary]);
+  const setPerformanceSummary = async (data: PerformanceSummary) => {
+    setPerformanceSummaryState(data);
+    await updatePerformanceSummary(data);
+  };
 
   return {
     goalsConcededData,
@@ -70,6 +83,7 @@ export const usePerformanceState = () => {
     shotPositionData,
     setShotPositionData,
     performanceSummary,
-    setPerformanceSummary
+    setPerformanceSummary,
+    isLoading
   };
 };

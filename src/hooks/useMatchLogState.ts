@@ -1,34 +1,42 @@
 
 import { useState, useEffect } from 'react';
 import { MatchLog } from '@/types/store-types';
-import { LOCAL_STORAGE_KEYS } from '@/constants/storage-keys';
-import { generateInitialMatchLogs } from '@/utils/store-utils';
+import { fetchMatchLogs, addMatchLog as addLog, updateMatchLog as updateLog, deleteMatchLog as deleteLog } from '@/services/database';
 
 export const useMatchLogState = () => {
-  const [matchLogs, setMatchLogs] = useState<MatchLog[]>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.MATCH_LOGS);
-    return saved ? JSON.parse(saved) : generateInitialMatchLogs();
-  });
+  const [matchLogs, setMatchLogs] = useState<MatchLog[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Load match logs from Supabase on component mount
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEYS.MATCH_LOGS, JSON.stringify(matchLogs));
-  }, [matchLogs]);
-
-  const addMatchLog = (match: Omit<MatchLog, "id">) => {
-    const newMatch: MatchLog = {
-      ...match,
-      id: `match-${Date.now()}`
+    const loadMatchLogs = async () => {
+      setIsLoading(true);
+      const logs = await fetchMatchLogs();
+      setMatchLogs(logs);
+      setIsLoading(false);
     };
-    setMatchLogs(prev => [...prev, newMatch]);
+    
+    loadMatchLogs();
+  }, []);
+
+  const addMatchLog = async (match: Omit<MatchLog, "id">) => {
+    const newId = await addLog(match);
+    if (newId) {
+      // Refresh the logs from the database to ensure consistency
+      const updatedLogs = await fetchMatchLogs();
+      setMatchLogs(updatedLogs);
+    }
   };
 
-  const updateMatchLog = (id: string, match: Partial<MatchLog>) => {
-    setMatchLogs(prev => 
-      prev.map(log => log.id === id ? { ...log, ...match } : log)
-    );
+  const updateMatchLog = async (id: string, match: Partial<MatchLog>) => {
+    await updateLog(id, match);
+    // Refresh the logs to ensure consistency
+    const updatedLogs = await fetchMatchLogs();
+    setMatchLogs(updatedLogs);
   };
 
-  const deleteMatchLog = (id: string) => {
+  const deleteMatchLog = async (id: string) => {
+    await deleteLog(id);
     setMatchLogs(prev => prev.filter(log => log.id !== id));
   };
 
@@ -37,6 +45,7 @@ export const useMatchLogState = () => {
     setMatchLogs,
     addMatchLog,
     updateMatchLog,
-    deleteMatchLog
+    deleteMatchLog,
+    isLoading
   };
 };

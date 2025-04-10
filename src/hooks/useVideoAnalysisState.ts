@@ -1,27 +1,35 @@
 
 import { useState, useEffect } from 'react';
 import { VideoAnalysis } from '@/types/store-types';
-import { LOCAL_STORAGE_KEYS } from '@/constants/storage-keys';
+import { fetchVideoAnalyses, addVideoAnalysis as addVideo, deleteVideoAnalysis as deleteVideo } from '@/services/database';
 
 export const useVideoAnalysisState = () => {
-  const [videoAnalyses, setVideoAnalyses] = useState<VideoAnalysis[]>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.VIDEO_ANALYSES);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [videoAnalyses, setVideoAnalyses] = useState<VideoAnalysis[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Load video analyses from Supabase on component mount
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEYS.VIDEO_ANALYSES, JSON.stringify(videoAnalyses));
-  }, [videoAnalyses]);
-
-  const addVideoAnalysis = (video: Omit<VideoAnalysis, "id">) => {
-    const newVideo: VideoAnalysis = {
-      ...video,
-      id: `video-${Date.now()}`
+    const loadVideoAnalyses = async () => {
+      setIsLoading(true);
+      const videos = await fetchVideoAnalyses();
+      setVideoAnalyses(videos);
+      setIsLoading(false);
     };
-    setVideoAnalyses(prev => [...prev, newVideo]);
+    
+    loadVideoAnalyses();
+  }, []);
+
+  const addVideoAnalysis = async (video: Omit<VideoAnalysis, "id">) => {
+    const newId = await addVideo(video);
+    if (newId) {
+      // Refresh the videos list from the database to ensure consistency
+      const updatedVideos = await fetchVideoAnalyses();
+      setVideoAnalyses(updatedVideos);
+    }
   };
 
-  const deleteVideoAnalysis = (id: string) => {
+  const deleteVideoAnalysis = async (id: string) => {
+    await deleteVideo(id);
     setVideoAnalyses(prev => prev.filter(video => video.id !== id));
   };
 
@@ -29,6 +37,7 @@ export const useVideoAnalysisState = () => {
     videoAnalyses,
     setVideoAnalyses,
     addVideoAnalysis,
-    deleteVideoAnalysis
+    deleteVideoAnalysis,
+    isLoading
   };
 };

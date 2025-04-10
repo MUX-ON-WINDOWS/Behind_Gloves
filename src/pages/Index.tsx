@@ -1,4 +1,3 @@
-
 import { Layout } from "@/components/Layout";
 import { SavesChart } from "@/components/SavesChart";
 import { GoalsConcededChart } from "@/components/GoalsConcededChart";
@@ -13,10 +12,19 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Calendar, BarChart, ClipboardCheck } from "lucide-react";
 import { useDataStore } from "@/lib/data-store";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { performanceSummary, userSettings } = useDataStore();
+  const { performanceSummary, userSettings, isLoading } = useDataStore();
+  
+  if (isLoading) {
+    return (
+      <Layout>
+        <LoadingSpinner message="Loading goalkeeper dashboard data..." />
+      </Layout>
+    );
+  }
   
   return (
     <Layout>

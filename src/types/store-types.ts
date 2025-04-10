@@ -117,4 +117,5 @@ export interface DataStoreContextType {
   setVideoAnalyses: (videos: VideoAnalysis[]) => void;
   addVideoAnalysis: (video: Omit<VideoAnalysis, "id">) => void;
   deleteVideoAnalysis: (id: string) => void;
+  isLoading: boolean;
 }

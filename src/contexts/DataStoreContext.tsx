@@ -1,5 +1,5 @@
 
-import { createContext, ReactNode, useEffect } from 'react';
+import { createContext, ReactNode, useEffect, useState } from 'react';
 import { DataStoreContextType } from '@/types/store-types';
 import { useMatchLogState } from '@/hooks/useMatchLogState';
 import { useVideoAnalysisState } from '@/hooks/useVideoAnalysisState';
@@ -22,17 +22,37 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
   const videoAnalysisState = useVideoAnalysisState();
   const performanceState = usePerformanceState();
   const matchState = useMatchState();
-  const { userSettings, setUserSettings } = useUserSettings();
+  const userSettingsState = useUserSettings();
+  
+  const [isLoading, setIsLoading] = useState(true);
   
   // Extract properties from state for clarity
   const { matchLogs } = matchLogState;
+  const { userSettings } = userSettingsState;
+  
+  // Track loading states from all hooks
+  useEffect(() => {
+    setIsLoading(
+      matchLogState.isLoading || 
+      videoAnalysisState.isLoading || 
+      performanceState.isLoading || 
+      matchState.isLoading || 
+      userSettingsState.isLoading
+    );
+  }, [
+    matchLogState.isLoading,
+    videoAnalysisState.isLoading,
+    performanceState.isLoading,
+    matchState.isLoading,
+    userSettingsState.isLoading
+  ]);
 
   // Recalculate performance statistics whenever match logs or club team changes
-  const recalculatePerformanceSummary = () => {
+  const recalculatePerformanceSummary = async () => {
     const stats = calculatePerformanceSummary(matchLogs, userSettings);
     
     // Update performance summary
-    performanceState.setPerformanceSummary({
+    await performanceState.setPerformanceSummary({
       matches: stats.matches,
       totalSaves: stats.totalSaves,
       totalGoalsConceded: stats.totalGoalsConceded,
@@ -48,22 +68,24 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
       stats
     );
     
-    matchState.setTeamScoreboard(updatedTeamScoreboard);
+    await matchState.setTeamScoreboard(updatedTeamScoreboard);
   };
   
   // Update chart data based on match logs
-  const updateChartData = () => {
+  const updateChartData = async () => {
     if (matchLogs.length > 0) {
       const { goalsConcededData, savesMadeData } = calculateChartData(matchLogs, userSettings);
       
-      performanceState.setGoalsConcededData(goalsConcededData);
-      performanceState.setSavesMadeData(savesMadeData);
+      await Promise.all([
+        performanceState.setGoalsConcededData(goalsConcededData),
+        performanceState.setSavesMadeData(savesMadeData)
+      ]);
     }
   };
   
   // Update data when match logs change
   useEffect(() => {
-    if (matchLogs.length > 0) {
+    if (!isLoading && matchLogs.length > 0) {
       // Update last match
       const sortedMatches = [...matchLogs].sort((a, b) => 
         new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -80,18 +102,20 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
         cleanSheet: recentMatch.cleanSheet,
         saves: recentMatch.saves
       });
+      
+      // Update performance summary and chart data
+      recalculatePerformanceSummary();
+      updateChartData();
     }
-    
-    // Update performance summary and chart data
-    recalculatePerformanceSummary();
-    updateChartData();
-  }, [matchLogs]);
+  }, [matchLogs, isLoading]);
   
   // Update when club team changes
   useEffect(() => {
-    updateChartData();
-    recalculatePerformanceSummary();
-  }, [userSettings.clubTeam]);
+    if (!isLoading) {
+      updateChartData();
+      recalculatePerformanceSummary();
+    }
+  }, [userSettings.clubTeam, isLoading]);
   
   // Combine all state and functions into the context value
   return (
@@ -101,9 +125,10 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
         ...matchState,
         ...matchLogState,
         userSettings,
-        setUserSettings,
+        setUserSettings: userSettingsState.setUserSettings,
         recalculatePerformanceSummary,
-        ...videoAnalysisState
+        ...videoAnalysisState,
+        isLoading
       }}
     >
       {children}

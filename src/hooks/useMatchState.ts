@@ -1,40 +1,72 @@
 
 import { useState, useEffect } from 'react';
 import { LastMatch, UpcomingMatch, TeamData } from '@/types/store-types';
-import { LOCAL_STORAGE_KEYS } from '@/constants/storage-keys';
-import {
-  lastMatch as initialLastMatch,
-  upcomingMatch as initialUpcomingMatch,
-  teamScoreboard as initialTeamScoreboard
-} from '@/lib/chart-data';
+import { 
+  fetchLastMatch, updateLastMatch,
+  fetchUpcomingMatch, updateUpcomingMatch,
+  fetchTeamScoreboard, updateTeamScoreboard
+} from '@/services/database';
 
 export const useMatchState = () => {
-  const [lastMatch, setLastMatch] = useState<LastMatch>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.LAST_MATCH);
-    return saved ? JSON.parse(saved) : initialLastMatch;
+  const [lastMatch, setLastMatchState] = useState<LastMatch>({
+    homeTeam: '',
+    homeScore: 0,
+    awayTeam: '',
+    awayScore: 0,
+    date: '',
+    venue: '',
+    cleanSheet: false,
+    saves: 0
   });
 
-  const [upcomingMatch, setUpcomingMatch] = useState<UpcomingMatch>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.UPCOMING_MATCH);
-    return saved ? JSON.parse(saved) : initialUpcomingMatch;
+  const [upcomingMatch, setUpcomingMatchState] = useState<UpcomingMatch>({
+    homeTeam: '',
+    awayTeam: '',
+    date: '',
+    time: '',
+    venue: '',
+    competition: ''
   });
 
-  const [teamScoreboard, setTeamScoreboard] = useState<TeamData[]>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.TEAM_SCOREBOARD);
-    return saved ? JSON.parse(saved) : initialTeamScoreboard;
-  });
+  const [teamScoreboard, setTeamScoreboardState] = useState<TeamData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Load data from Supabase on component mount
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEYS.LAST_MATCH, JSON.stringify(lastMatch));
-  }, [lastMatch]);
+    const loadData = async () => {
+      setIsLoading(true);
+      
+      const [lastMatchData, upcomingMatchData, teamScoreboardData] = await Promise.all([
+        fetchLastMatch(),
+        fetchUpcomingMatch(),
+        fetchTeamScoreboard()
+      ]);
+      
+      setLastMatchState(lastMatchData);
+      setUpcomingMatchState(upcomingMatchData);
+      setTeamScoreboardState(teamScoreboardData);
+      
+      setIsLoading(false);
+    };
+    
+    loadData();
+  }, []);
 
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEYS.UPCOMING_MATCH, JSON.stringify(upcomingMatch));
-  }, [upcomingMatch]);
+  // Custom setters that update Supabase
+  const setLastMatch = async (match: LastMatch) => {
+    setLastMatchState(match);
+    await updateLastMatch(match);
+  };
 
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEYS.TEAM_SCOREBOARD, JSON.stringify(teamScoreboard));
-  }, [teamScoreboard]);
+  const setUpcomingMatch = async (match: UpcomingMatch) => {
+    setUpcomingMatchState(match);
+    await updateUpcomingMatch(match);
+  };
+
+  const setTeamScoreboard = async (teams: TeamData[]) => {
+    setTeamScoreboardState(teams);
+    await updateTeamScoreboard(teams);
+  };
 
   return {
     lastMatch,
@@ -42,6 +74,7 @@ export const useMatchState = () => {
     upcomingMatch,
     setUpcomingMatch,
     teamScoreboard,
-    setTeamScoreboard
+    setTeamScoreboard,
+    isLoading
   };
 };
