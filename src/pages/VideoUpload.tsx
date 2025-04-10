@@ -9,6 +9,7 @@ import { useDataStore } from "@/lib/data-store";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { GoogleGenAI } from "@google/genai";
 
 export default function VideoUpload() {
   const [file, setFile] = useState<File | null>(null);
@@ -112,13 +113,32 @@ export default function VideoUpload() {
 
       // API URL with the actual API key
       const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyDF6Voc8Qoi_XTMbuUfKJzt0LnLBNXwDlI";
-
+      // https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key
       // Prepare the payload - for demo we'll use the text prompt since we can't process video yet
       const payload = {
         contents: [{
           parts: [{
-            text: "Could you tell me how many saves I made and how many goals I conceded?"
-          }]
+            text: `Here is a match summary:
+
+                    00:01:12: Save (Quick reaction stop)
+                    00:03:25: Goal (Opponent header)
+                    00:07:18: Save (One-handed dive)
+                    00:09:55: Goal (Penalty kick)
+
+                    Can you summarize how many saves and goals I had?
+
+                    Ouput needs to be:
+                    Summary: {Summary}
+                    Saves: {Number}
+                    Goals Conceded: {Number}`
+          },
+          // {
+          //   inline_data: {
+          //     type: "video",
+          //     data: file
+          //   }
+          // }
+        ]
         }]
       };
       
