@@ -15,6 +15,7 @@ export const MatchLogComponent = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   
   // State for the currently selected match (for editing or deleting)
@@ -103,37 +104,48 @@ export const MatchLogComponent = () => {
     setIsDeleteDialogOpen(true);
   };
   
-  const handleAddMatch = () => {
-    addMatchLog(formData);
-    recalculatePerformanceSummary();
-    toast({
-      title: "Match Added",
-      description: "New match has been added to your log."
-    });
-    setIsAddDialogOpen(false);
-  };
-  
-  const handleUpdateMatch = () => {
-    if (selectedMatchId) {
-      updateMatchLog(selectedMatchId, formData);
-      recalculatePerformanceSummary();
-      toast({
-        title: "Match Updated",
-        description: "Match details have been updated."
-      });
-      setIsEditDialogOpen(false);
+  const handleAddMatch = async () => {
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    try {
+      const success = await addMatchLog(formData);
+      if (success) {
+        recalculatePerformanceSummary();
+        setIsAddDialogOpen(false);
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
-  const handleDeleteMatch = () => {
-    if (selectedMatchId) {
-      deleteMatchLog(selectedMatchId);
-      recalculatePerformanceSummary();
-      toast({
-        title: "Match Deleted",
-        description: "Match has been removed from your log."
-      });
-      setIsDeleteDialogOpen(false);
+  const handleUpdateMatch = async () => {
+    if (isSubmitting || !selectedMatchId) return;
+    
+    setIsSubmitting(true);
+    try {
+      const success = await updateMatchLog(selectedMatchId, formData);
+      if (success) {
+        recalculatePerformanceSummary();
+        setIsEditDialogOpen(false);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  const handleDeleteMatch = async () => {
+    if (isSubmitting || !selectedMatchId) return;
+    
+    setIsSubmitting(true);
+    try {
+      const success = await deleteMatchLog(selectedMatchId);
+      if (success) {
+        recalculatePerformanceSummary();
+        setIsDeleteDialogOpen(false);
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
   

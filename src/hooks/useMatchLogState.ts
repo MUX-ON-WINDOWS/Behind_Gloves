@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { MatchLog } from '@/types/store-types';
 import { fetchMatchLogs, addMatchLog as addLog, updateMatchLog as updateLog, deleteMatchLog as deleteLog } from '@/services/database';
@@ -9,6 +9,7 @@ export const useMatchLogState = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const isMounted = useRef(true);
 
   // Load match logs from Supabase on component mount
   useEffect(() => {
@@ -18,21 +19,31 @@ export const useMatchLogState = () => {
       
       try {
         const logs = await fetchMatchLogs();
-        setMatchLogs(logs);
+        if (isMounted.current) {
+          setMatchLogs(logs);
+        }
       } catch (err) {
         console.error("Failed to load match logs:", err);
-        setError("Failed to load match logs");
-        toast({
-          variant: "destructive",
-          title: "Connection Error",
-          description: "Could not load match logs from database",
-        });
+        if (isMounted.current) {
+          setError("Failed to load match logs");
+          toast({
+            variant: "destructive",
+            title: "Connection Error",
+            description: "Could not load match logs from database",
+          });
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted.current) {
+          setIsLoading(false);
+        }
       }
     };
     
     loadMatchLogs();
+    
+    return () => {
+      isMounted.current = false;
+    };
   }, [toast]);
 
   const addMatchLog = async (match: Omit<MatchLog, "id">) => {
@@ -43,10 +54,15 @@ export const useMatchLogState = () => {
           title: "Match added",
           description: "Your match has been saved",
         });
+        
         // Refresh the logs from the database to ensure consistency
         const updatedLogs = await fetchMatchLogs();
-        setMatchLogs(updatedLogs);
+        if (isMounted.current) {
+          setMatchLogs(updatedLogs);
+        }
+        return true;
       }
+      return false;
     } catch (err) {
       console.error("Failed to add match log:", err);
       toast({
@@ -54,6 +70,7 @@ export const useMatchLogState = () => {
         title: "Save failed",
         description: "Failed to save match log to database",
       });
+      return false;
     }
   };
 
@@ -64,9 +81,13 @@ export const useMatchLogState = () => {
         title: "Match updated",
         description: "Match details have been updated",
       });
+      
       // Refresh the logs to ensure consistency
       const updatedLogs = await fetchMatchLogs();
-      setMatchLogs(updatedLogs);
+      if (isMounted.current) {
+        setMatchLogs(updatedLogs);
+      }
+      return true;
     } catch (err) {
       console.error("Failed to update match log:", err);
       toast({
@@ -74,17 +95,21 @@ export const useMatchLogState = () => {
         title: "Update failed",
         description: "Failed to update match log in database",
       });
+      return false;
     }
   };
 
   const deleteMatchLog = async (id: string) => {
     try {
       await deleteLog(id);
-      setMatchLogs(prev => prev.filter(log => log.id !== id));
+      if (isMounted.current) {
+        setMatchLogs(prev => prev.filter(log => log.id !== id));
+      }
       toast({
         title: "Match deleted",
         description: "Match has been removed",
       });
+      return true;
     } catch (err) {
       console.error("Failed to delete match log:", err);
       toast({
@@ -92,6 +117,7 @@ export const useMatchLogState = () => {
         title: "Delete failed",
         description: "Failed to remove match log from database",
       });
+      return false;
     }
   };
 

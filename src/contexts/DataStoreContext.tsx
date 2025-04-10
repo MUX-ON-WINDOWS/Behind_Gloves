@@ -1,4 +1,5 @@
-import { createContext, ReactNode, useEffect, useState } from 'react';
+
+import { createContext, ReactNode, useEffect, useState, useCallback } from 'react';
 import { DataStoreContextType } from '@/types/store-types';
 import { useMatchLogState } from '@/hooks/useMatchLogState';
 import { useVideoAnalysisState } from '@/hooks/useVideoAnalysisState';
@@ -30,6 +31,7 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
   
   const [isLoading, setIsLoading] = useState(true);
   const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [updatingStats, setUpdatingStats] = useState(false);
   
   // Check database connection on mount
   useEffect(() => {
@@ -72,7 +74,10 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
   ]);
 
   // Recalculate performance statistics whenever match logs or club team changes
-  const recalculatePerformanceSummary = async () => {
+  const recalculatePerformanceSummary = useCallback(async () => {
+    if (updatingStats) return;
+    
+    setUpdatingStats(true);
     try {
       const stats = calculatePerformanceSummary(matchLogs, userSettings);
       
@@ -94,6 +99,7 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
       );
       
       await matchState.setTeamScoreboard(updatedTeamScoreboard);
+      console.info('Performance summary updated successfully');
     } catch (error) {
       console.error('Failed to recalculate performance summary:', error);
       toast({
@@ -101,11 +107,13 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
         title: "Update failed",
         description: "Failed to update performance statistics"
       });
+    } finally {
+      setUpdatingStats(false);
     }
-  };
+  }, [matchLogs, userSettings, performanceState, matchState, toast, updatingStats]);
   
   // Update chart data based on match logs
-  const updateChartData = async () => {
+  const updateChartData = useCallback(async () => {
     if (matchLogs.length > 0) {
       try {
         const { goalsConcededData, savesMadeData } = calculateChartData(matchLogs, userSettings);
@@ -123,11 +131,11 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
         });
       }
     }
-  };
+  }, [matchLogs, userSettings, performanceState, toast]);
   
   // Update data when match logs change
   useEffect(() => {
-    if (!isLoading && matchLogs.length > 0) {
+    if (!isLoading && matchLogs.length > 0 && !updatingStats) {
       // Update last match
       const sortedMatches = [...matchLogs].sort((a, b) => 
         new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -149,15 +157,15 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
       recalculatePerformanceSummary();
       updateChartData();
     }
-  }, [matchLogs, isLoading]);
+  }, [matchLogs, isLoading, updatingStats, matchState, recalculatePerformanceSummary, updateChartData]);
   
   // Update when club team changes
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && !updatingStats) {
       updateChartData();
       recalculatePerformanceSummary();
     }
-  }, [userSettings.clubTeam, isLoading]);
+  }, [userSettings.clubTeam, isLoading, updatingStats, updateChartData, recalculatePerformanceSummary]);
   
   // Combine all state and functions into the context value
   return (
