@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useDataStore, MatchLog } from "@/lib/data-store";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -109,11 +108,11 @@ export const MatchLogComponent = () => {
     
     setIsSubmitting(true);
     try {
-      const success = await addMatchLog(formData);
-      if (success) {
-        recalculatePerformanceSummary();
-        setIsAddDialogOpen(false);
-      }
+      await addMatchLog(formData);
+      await recalculatePerformanceSummary();
+      setIsAddDialogOpen(false);
+    } catch (error) {
+      console.error('Failed to add match:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -124,11 +123,11 @@ export const MatchLogComponent = () => {
     
     setIsSubmitting(true);
     try {
-      const success = await updateMatchLog(selectedMatchId, formData);
-      if (success) {
-        recalculatePerformanceSummary();
-        setIsEditDialogOpen(false);
-      }
+      await updateMatchLog(selectedMatchId, formData);
+      await recalculatePerformanceSummary();
+      setIsEditDialogOpen(false);
+    } catch (error) {
+      console.error('Failed to update match:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -139,11 +138,11 @@ export const MatchLogComponent = () => {
     
     setIsSubmitting(true);
     try {
-      const success = await deleteMatchLog(selectedMatchId);
-      if (success) {
-        recalculatePerformanceSummary();
-        setIsDeleteDialogOpen(false);
-      }
+      await deleteMatchLog(selectedMatchId);
+      await recalculatePerformanceSummary();
+      setIsDeleteDialogOpen(false);
+    } catch (error) {
+      console.error('Failed to delete match:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -389,8 +388,10 @@ export const MatchLogComponent = () => {
             </div>
             
             <DialogFooter>
-              <Button variant="ghost" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-              <Button onClick={handleAddMatch}>Add Match</Button>
+              <Button variant="ghost" onClick={() => setIsAddDialogOpen(false)} disabled={isSubmitting}>Cancel</Button>
+              <Button onClick={handleAddMatch} disabled={isSubmitting}>
+                {isSubmitting ? "Adding..." : "Add Match"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -513,8 +514,10 @@ export const MatchLogComponent = () => {
             </div>
             
             <DialogFooter>
-              <Button variant="ghost" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-              <Button onClick={handleUpdateMatch}>Update Match</Button>
+              <Button variant="ghost" onClick={() => setIsEditDialogOpen(false)} disabled={isSubmitting}>Cancel</Button>
+              <Button onClick={handleUpdateMatch} disabled={isSubmitting}>
+                {isSubmitting ? "Updating..." : "Update Match"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -545,8 +548,10 @@ export const MatchLogComponent = () => {
             )}
             
             <DialogFooter>
-              <Button variant="ghost" onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={handleDeleteMatch}>Delete</Button>
+              <Button variant="ghost" onClick={() => setIsDeleteDialogOpen(false)} disabled={isSubmitting}>Cancel</Button>
+              <Button variant="destructive" onClick={handleDeleteMatch} disabled={isSubmitting}>
+                {isSubmitting ? "Deleting..." : "Delete"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
