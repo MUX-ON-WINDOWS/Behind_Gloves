@@ -1,4 +1,3 @@
-
 import { createContext, ReactNode, useEffect, useState } from 'react';
 import { DataStoreContextType } from '@/types/store-types';
 import { useMatchLogState } from '@/hooks/useMatchLogState';
@@ -13,6 +12,8 @@ import {
 } from '@/utils/performance-calculator';
 import { useToast } from '@/hooks/use-toast';
 import { checkSupabaseConnection } from '@/lib/supabase';
+import { DatabaseConnectionError } from '@/components/DatabaseConnectionError';
+import { Button } from '@/components/ui/button';
 
 // Create the context
 export const DataStoreContext = createContext<DataStoreContextType | undefined>(undefined);
@@ -175,20 +176,7 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
     >
       {connectionError && !isLoading ? (
         <div className="flex items-center justify-center min-h-screen bg-background">
-          {import('./DatabaseConnectionError').then(module => (
-            <module.DatabaseConnectionError />
-          )).catch(() => (
-            <div className="text-center p-4">
-              <h1 className="text-xl font-bold">Database Connection Error</h1>
-              <p className="text-muted-foreground mt-2">Unable to connect to the database.</p>
-              <Button 
-                onClick={() => window.location.reload()} 
-                className="mt-4"
-              >
-                Retry
-              </Button>
-            </div>
-          ))}
+          <DatabaseConnectionError />
         </div>
       ) : (
         children
