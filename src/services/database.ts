@@ -514,7 +514,7 @@ export async function fetchUserSettings(): Promise<UserSettings> {
     const { data, error } = await supabase.from('UserSettings').select('*').order('id', { ascending: false }).limit(1);
     if (error) throw error;
     console.log('Fetched user settings:', data);
-    return data[0] || { clubTeam: 'VV Dongen' };
+    return data[0] || { clubTeam: 'VV Dongen' }; // TODO: change to the user's club team  
   } catch (error) {
     return handleSupabaseError(error, 'fetching user settings');
   }
