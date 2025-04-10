@@ -135,7 +135,7 @@ export async function fetchPerformanceSummary(): Promise<PerformanceSummary> {
 }
 
 export async function updatePerformanceSummary(summary: PerformanceSummary): Promise<void> {
-  console.log('Updating performance summary:', summary);
+  // console.log('Updating performance summary:', summary);
   try {
     // Check if any record exists
     const { data, error: checkError } = await supabase.from('PerformanceSummary').select('id').limit(1);
@@ -187,7 +187,7 @@ export async function fetchLastMatch(): Promise<LastMatch> {
 }
 
 export async function updateLastMatch(match: LastMatch): Promise<void> {
-  console.log('Updating last match:', match);
+  // console.log('Updating last match:', match);
   try {
     // Check if any record exists
     const { data, error: checkError } = await supabase.from('LastMatch').select('id').limit(1);

@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -70,14 +69,16 @@ const DataOverview = () => {
   const [activeTab, setActiveTab] = useState("matches");
   const { toast } = useToast();
   
+  const hasSetLastMatch = useRef(false);
+  
   useEffect(() => {
-    if (matchLogs.length > 0) {
-      const sortedMatches = [...matchLogs].sort((a, b) => 
+    if (!hasSetLastMatch.current && matchLogs.length > 100) {
+      const sortedMatches = [...matchLogs].sort((a, b) =>
         new Date(b.date).getTime() - new Date(a.date).getTime()
       );
-      
+  
       const recentMatch = sortedMatches[0];
-      
+  
       setLastMatch({
         homeTeam: recentMatch.homeTeam,
         homeScore: recentMatch.homeScore,
@@ -88,10 +89,12 @@ const DataOverview = () => {
         cleanSheet: recentMatch.cleanSheet,
         saves: recentMatch.saves
       });
-      
+  
       recalculatePerformanceSummary();
+      hasSetLastMatch.current = true; // ✅ Only run once
     }
-  }, [matchLogs, setLastMatch, userSettings.clubTeam, recalculatePerformanceSummary]);
+  }, [matchLogs, setLastMatch, recalculatePerformanceSummary]);
+  
   
   const addForm = useForm<MatchFormValues>({
     resolver: zodResolver(matchFormSchema),

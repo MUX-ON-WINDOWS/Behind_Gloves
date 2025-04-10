@@ -64,7 +64,7 @@ export const useMatchState = () => {
     };
     
     loadData();
-  }, [toast]);
+  }, []);
 
   // Custom setters that update Supabase
   const setLastMatch = async (match: LastMatch) => {
