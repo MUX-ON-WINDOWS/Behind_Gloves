@@ -49,72 +49,12 @@ const Index = () => {
           <UpcomingMatch />
         </div>
 
-        <Tabs defaultValue="charts" className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger value="charts">Charts</TabsTrigger>
-            <TabsTrigger value="analysis">Analysis</TabsTrigger>
-            <TabsTrigger value="scoreboard">Scoreboard</TabsTrigger>
-            <TabsTrigger value="matchlog">Match Log</TabsTrigger>
-          </TabsList>
-          
+        <Tabs defaultValue="charts" className="w-full">          
           <TabsContent value="charts">
+            <h3 className="text-lg font-semibold mb-4">Performance Charts</h3>
             <div className="grid gap-6 md:grid-cols-2">
               <SavesChart />
               <GoalsConcededChart />
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="analysis">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Performance Analysis</CardTitle>
-                  <CardDescription>
-                    Detailed breakdown of goalkeeper performance
-                  </CardDescription>
-                </div>
-                <Button variant="outline" onClick={() => navigate("/performance")}>
-                  <BarChart size={16} className="mr-2" />
-                  Full Analysis
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-medium">Strengths</h3>
-                    <ul className="list-disc list-inside ml-4 mt-2">
-                      <li>Excellent at saving shots from the top left corner</li>
-                      <li>Strong performance on one-on-one situations</li>
-                      <li>Consistent save percentage above league average</li>
-                    </ul>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-lg font-medium">Areas for Improvement</h3>
-                    <ul className="list-disc list-inside ml-4 mt-2">
-                      <li>Positioning on set pieces needs work</li>
-                      <li>Tendency to concede from bottom right corner shots</li>
-                      <li>Distribution accuracy could be improved</li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="scoreboard">
-            <TeamScoreboard />
-          </TabsContent>
-          
-          <TabsContent value="matchlog">
-            <div className="flex flex-col space-y-4">
-              <div className="flex justify-end">
-                <Button onClick={() => navigate("/match-overview")} size="sm">
-                  <Calendar size={16} className="mr-2" />
-                  View All Matches
-                </Button>
-              </div>
-              <MatchLogComponent />
             </div>
           </TabsContent>
         </Tabs>
