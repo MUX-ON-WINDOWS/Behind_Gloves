@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import {
   GoalsConcededDataPoint,
@@ -15,7 +14,7 @@ import {
 
 // Helper function for error handling
 const handleSupabaseError = (error: any, operation: string) => {
-  console.error(`Error ${operation}:`, error);
+  // console.error(`Error ${operation}:`, error);
   if (error?.message?.includes('JWT')) {
     console.error('Authentication error - please check your Supabase API key');
   }
@@ -370,17 +369,53 @@ export async function fetchVideoAnalyses(): Promise<VideoAnalysis[]> {
         const { data: savesData, error: savesError } = await supabase
           .from('VideoSaves')
           .select('*')
-          .eq('videoId', video.id);
+          .eq('video_id', video.id);
           
-        if (savesError) throw savesError;
+        if (savesError) {
+          console.error(`Error fetching saves for video ${video.id}:`, savesError);
+          return {
+            id: video.id,
+            date: video.date ? new Date(video.date).toISOString() : '',
+            title: video.title || '',
+            description: video.description || '',
+            saves: video.saves || 0,
+            goals: video.goals || 0,
+            videoStats: {
+              analysis: video.analysis || '',
+              summary: video.summary || '',
+              title: video.videoTitle || video.title || '',
+              description: video.videoDescription || video.description || '',
+              saves: [],
+              goals: []
+            }
+          };
+        }
         
         // Fetch goals
         const { data: goalsData, error: goalsError } = await supabase
           .from('VideoGoals')
           .select('*')
-          .eq('videoId', video.id);
+          .eq('video_id', video.id);
           
-        if (goalsError) throw goalsError;
+        if (goalsError) {
+          console.error(`Error fetching goals for video ${video.id}:`, goalsError);
+          return {
+            id: video.id,
+            date: video.date ? new Date(video.date).toISOString() : '',
+            title: video.title || '',
+            description: video.description || '',
+            saves: video.saves || 0,
+            goals: video.goals || 0,
+            videoStats: {
+              analysis: video.analysis || '',
+              summary: video.summary || '',
+              title: video.videoTitle || video.title || '',
+              description: video.videoDescription || video.description || '',
+              saves: savesData || [],
+              goals: []
+            }
+          };
+        }
         
         // Construct the full video analysis object
         return {

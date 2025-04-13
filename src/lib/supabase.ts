@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 
 // These should come from environment variables in production
@@ -6,7 +5,18 @@ const supabaseUrl = 'https://byfnoivaiavwthgwooui.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5Zm5vaXZhaWF2d3RoZ3dvb3VpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQyMzIxMjEsImV4cCI6MjA1OTgwODEyMX0.LdwCV-Oh4Y9v7s2uYg2_Wa6MSrkn1msX8hUgwlWqs0Y';
 
 // Create a single supabase client for the entire app
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true
+  },
+  global: {
+    headers: {
+      'apikey': supabaseKey,
+      'Authorization': `Bearer ${supabaseKey}`
+    }
+  }
+});
 
 // Helper to check if Supabase connection is working
 export const checkSupabaseConnection = async () => {

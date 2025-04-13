@@ -1,9 +1,8 @@
-
 import { useDataStore } from "@/lib/data-store";
 import { StatsCard } from "@/components/StatsCard";
 
 export const PerformanceSummary = () => {
-  const { performanceSummary } = useDataStore();
+  const { performanceSummary, matchLogs, lastMatch } = useDataStore();
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -14,7 +13,8 @@ export const PerformanceSummary = () => {
       <StatsCard 
         title="Total Saves"
         value={performanceSummary.totalSaves}
-        trend="up"
+        description={`${Math.round((performanceSummary.totalSaves / performanceSummary.matches))} saves per match`}
+        trend="down"
       />
       <StatsCard 
         title="Clean Sheets"
@@ -24,7 +24,8 @@ export const PerformanceSummary = () => {
       />
       <StatsCard 
         title="Save Percentage"
-        value={`${performanceSummary.savePercentage}%`}
+        value={`${Math.round((performanceSummary.totalSaves / (performanceSummary.totalSaves + performanceSummary.totalGoalsConceded)) * 100)}%`}
+        description={`${Math.round((performanceSummary.totalSaves + performanceSummary.totalGoalsConceded))} total shots faced`}
         trend="up"
       />
     </div>

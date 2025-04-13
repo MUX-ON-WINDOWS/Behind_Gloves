@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { GoogleGenAI } from "@google/genai";
+import { supabase } from "@/lib/supabase";
 
 export default function VideoUpload() {
   const [file, setFile] = useState<File | null>(null);
@@ -25,6 +26,7 @@ export default function VideoUpload() {
     summary: string;
     title?: string;
     description?: string;
+    videoUrl: string;
   } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -100,6 +102,28 @@ export default function VideoUpload() {
     setUploadProgress(0);
     
     try {
+      // Upload to Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('videos')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        throw new Error(`Storage upload failed: ${uploadError.message}`);
+      }
+
+      console.log("Uploaded video to Supabase Storage");
+
+      // Get the public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('videos')
+        .getPublicUrl(fileName);
+
       // Simulate upload progress
       const progressInterval = setInterval(() => {
         setUploadProgress(prev => {
@@ -113,7 +137,7 @@ export default function VideoUpload() {
 
       // API URL with the actual API key
       const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyDF6Voc8Qoi_XTMbuUfKJzt0LnLBNXwDlI";
-      // https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key
+      
       // Prepare the payload - for demo we'll use the text prompt since we can't process video yet
       const payload = {
         contents: [{
@@ -131,14 +155,7 @@ export default function VideoUpload() {
                     Summary: {Summary}
                     Saves: {Number}
                     Goals Conceded: {Number}`
-          },
-          // {
-          //   inline_data: {
-          //     type: "video",
-          //     data: file
-          //   }
-          // }
-        ]
+          }]
         }]
       };
       
@@ -150,6 +167,8 @@ export default function VideoUpload() {
         },
         body: JSON.stringify(payload)
       });
+
+      console.log("Response from Gemini API:", response);
 
       clearInterval(progressInterval);
       
@@ -196,7 +215,8 @@ export default function VideoUpload() {
         goals,
         summary,
         title: videoTitle,
-        description: videoDescription
+        description: videoDescription,
+        videoUrl: publicUrl
       };
       
       setVideoStats(processedStats);

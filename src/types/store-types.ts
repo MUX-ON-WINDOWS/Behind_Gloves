@@ -1,4 +1,3 @@
-
 // Define types for all our data structures
 export interface GoalsConcededDataPoint {
   name: string;
@@ -82,6 +81,7 @@ export interface VideoAnalysis {
     summary: string;
     title?: string;
     description?: string;
+    videoUrl?: string;
   };
 }
 
