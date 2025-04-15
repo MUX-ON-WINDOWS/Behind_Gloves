@@ -56,7 +56,6 @@ const DataOverview = () => {
     deleteVideoAnalysis,
     recalculatePerformanceSummary,
     setLastMatch,
-    lastMatch,
     userSettings
   } = useDataStore();
   

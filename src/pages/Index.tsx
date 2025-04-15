@@ -17,7 +17,7 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 const Index = () => {
   const navigate = useNavigate();
   const { performanceSummary, userSettings, isLoading } = useDataStore();
-  
+
   if (isLoading) {
     return (
       <Layout>
@@ -25,7 +25,7 @@ const Index = () => {
       </Layout>
     );
   }
-  
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -41,15 +41,47 @@ const Index = () => {
             View All Matches
           </Button>
         </div>
-        
+
         <PerformanceSummary />
 
         <div className="grid gap-6 md:grid-cols-2">
           <LastMatch />
-          <UpcomingMatch />
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Recent Performance</CardTitle>
+                <CardDescription>Team: {userSettings.clubTeam} — Last {performanceSummary.matches} matches</CardDescription>
+              </div>
+              <Button variant="outline" onClick={() => navigate("/match-overview")}>
+                <ClipboardCheck size={16} className="mr-2" />
+                Match History
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-10">
+                <p className="text-4xl font-bold">{performanceSummary.savePercentage}%</p>
+                <p className="text-muted-foreground mt-2">Save success rate</p>
+
+                <div className="flex justify-center gap-8 mt-8">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-keeper-green">{performanceSummary.totalSaves}</p>
+                    <p className="text-muted-foreground text-sm">Saves Made</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-keeper-red">{performanceSummary.totalGoalsConceded}</p>
+                    <p className="text-muted-foreground text-sm">Goals Conceded</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-keeper-blue">{performanceSummary.cleanSheets}</p>
+                    <p className="text-muted-foreground text-sm">Clean Sheets</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        <Tabs defaultValue="charts" className="w-full">          
+        <Tabs defaultValue="charts" className="w-full">
           <TabsContent value="charts">
             <h3 className="text-lg font-semibold mb-4">Performance Charts</h3>
             <div className="grid gap-6 md:grid-cols-2">
@@ -59,39 +91,6 @@ const Index = () => {
           </TabsContent>
         </Tabs>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Recent Performance</CardTitle>
-              <CardDescription>Team: {userSettings.clubTeam} — Last {performanceSummary.matches} matches</CardDescription>
-            </div>
-            <Button variant="outline" onClick={() => navigate("/match-overview")}>
-              <ClipboardCheck size={16} className="mr-2" />
-              Match History
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-10">
-              <p className="text-4xl font-bold">{performanceSummary.savePercentage}%</p>
-              <p className="text-muted-foreground mt-2">Save success rate</p>
-              
-              <div className="flex justify-center gap-8 mt-8">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-keeper-green">{performanceSummary.totalSaves}</p>
-                  <p className="text-muted-foreground text-sm">Saves Made</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-keeper-red">{performanceSummary.totalGoalsConceded}</p>
-                  <p className="text-muted-foreground text-sm">Goals Conceded</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-keeper-blue">{performanceSummary.cleanSheets}</p>
-                  <p className="text-muted-foreground text-sm">Clean Sheets</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </Layout>
   );
