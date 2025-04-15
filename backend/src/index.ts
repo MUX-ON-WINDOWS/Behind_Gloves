@@ -5,8 +5,8 @@ import { config } from 'dotenv';
 import videoRoutes from './routes/video.routes';
 import { errorHandler } from './middleware/errorHandler';
 
-// Load environment variables
-config();
+// Load environment variables from .env.local
+config({ path: '.env.local' });
 
 const app = express();
 const port = process.env.PORT || 3001;

@@ -1,8 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 
-// These should come from environment variables in production
-const supabaseUrl = 'https://byfnoivaiavwthgwooui.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5Zm5vaXZhaWF2d3RoZ3dvb3VpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQyMzIxMjEsImV4cCI6MjA1OTgwODEyMX0.LdwCV-Oh4Y9v7s2uYg2_Wa6MSrkn1msX8hUgwlWqs0Y';
+// Get Supabase URL and key from environment variables
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Missing Supabase environment variables');
+}
 
 // Create a single supabase client for the entire app
 export const supabase = createClient(supabaseUrl, supabaseKey, {
