@@ -3,14 +3,11 @@ import { SavesChart } from "@/components/SavesChart";
 import { GoalsConcededChart } from "@/components/GoalsConcededChart";
 import { PerformanceSummary } from "@/components/PerformanceSummary";
 import { LastMatch } from "@/components/LastMatch";
-import { UpcomingMatch } from "@/components/UpcomingMatch";
-import { TeamScoreboard } from "@/components/TeamScoreboard";
-import { MatchLogComponent } from "@/components/MatchLog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Calendar, BarChart, ClipboardCheck } from "lucide-react";
+import { Calendar, ClipboardCheck } from "lucide-react";
 import { useDataStore } from "@/lib/data-store";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 
