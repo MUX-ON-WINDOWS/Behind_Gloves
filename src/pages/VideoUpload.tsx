@@ -102,145 +102,76 @@ export default function VideoUpload() {
     setUploadProgress(0);
     
     try {
-      // Upload to Supabase Storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      // Create FormData for the upload
+      const formData = new FormData();
+      formData.append('video', file);
+      formData.append('title', videoTitle);
+      formData.append('description', videoDescription);
       
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('videos')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) {
-        throw new Error(`Storage upload failed: ${uploadError.message}`);
+      // Upload video to backend
+      const uploadResponse = await fetch('http://localhost:3001/api/videos/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload video');
       }
+      
+      const { videoId } = await uploadResponse.json();
 
-      console.log("Uploaded video to Supabase Storage");
+      console.log("Video ID: " + videoId);
+      
+      // Poll for analysis results
+      const pollInterval = setInterval(async () => {
+        const resultsResponse = await fetch(`http://localhost:3001/api/videos/results/${videoId}`);
+        
+        if (resultsResponse.ok) {
+          const results = await resultsResponse.json();
+          
+          if (results.status === 'completed' && results.data) {
+            clearInterval(pollInterval);
+            
+            const processedStats = {
+              analysis: "Video analysis complete",
+              saves: results.data.saves,
+              goals: results.data.goals,
+              events: results.data.events,
+              summary: `Found ${results.data.saves} saves and ${results.data.goals} goals`,
+              title: videoTitle,
+              description: videoDescription,
+              videoUrl: `http://localhost:3001/uploads/${videoId}.mp4`
+            };
+            
+            setVideoStats(processedStats);
+            setUploadProgress(100);
+            
+            // Send the data to the data store for the Data Overview page
+            addVideoAnalysis({
+              date: new Date().toISOString(),
+              title: videoTitle,
+              description: videoDescription,
+              saves: results.data.saves,
+              goals: results.data.goals,
+              videoStats: processedStats
+            });
+            
+            toast({
+              title: "Analysis complete",
+              description: `Found ${results.data.saves} saves and ${results.data.goals} goals.`
+            });
+            
+            console.log(results.data + " - " + results.data.events);
 
-      // Get the public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('videos')
-        .getPublicUrl(fileName);
-
-      // Simulate upload progress
-      const progressInterval = setInterval(() => {
-        setUploadProgress(prev => {
-          if (prev >= 95) {
-            clearInterval(progressInterval);
-            return 95;
+            // Reset progress after showing 100% briefly
+            setTimeout(() => {
+              setIsUploading(false);
+            }, 1000);
+          } else if (results.status === 'processing') {
+            setUploadProgress(prev => Math.min(prev + 5, 95));
           }
-          return prev + 5;
-        });
-      }, 300);
-
-      // API URL with the actual API key
-      const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyDF6Voc8Qoi_XTMbuUfKJzt0LnLBNXwDlI";
-      
-      // Prepare the payload - for demo we'll use the text prompt since we can't process video yet
-      const payload = {
-        contents: [{
-          parts: [{
-            text: `Here is a match summary:
-
-                    00:01:12: Save (Quick reaction stop)
-                    00:03:25: Goal (Opponent header)
-                    00:07:18: Save (One-handed dive)
-                    00:09:55: Goal (Penalty kick)
-
-                    Can you summarize how many saves and goals I had?
-
-                    Ouput needs to be:
-                    Summary: {Summary}
-                    Saves: {Number}
-                    Goals Conceded: {Number}`
-          }]
-        }]
-      };
-      
-      // Send the request to the Gemini API
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      });
-
-      console.log("Response from Gemini API:", response);
-
-      clearInterval(progressInterval);
-      
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} - ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      
-      // Extract the response text
-      const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || "No analysis available";
-      
-      // Parse the sample output
-      const savesRegex = /(\d+:\d+): Save \((.*?)\)/g;
-      const goalsRegex = /(\d+:\d+): Goal \((.*?)\)/g;
-      
-      let match;
-      const saves: { timestamp: string; description: string }[] = [];
-      const goals: { timestamp: string; description: string }[] = [];
-      
-      // Extract saves
-      while ((match = savesRegex.exec(responseText)) !== null) {
-        saves.push({
-          timestamp: match[1],
-          description: match[2]
-        });
-      }
-      
-      // Extract goals
-      while ((match = goalsRegex.exec(responseText)) !== null) {
-        goals.push({
-          timestamp: match[1],
-          description: match[2]
-        });
-      }
-      
-      // Extract summary (last line)
-      const lines = responseText.split('\n').filter(line => line.trim() !== '');
-      const summary = lines[lines.length - 1];
-      
-      const processedStats = {
-        analysis: responseText,
-        saves,
-        goals,
-        summary,
-        title: videoTitle,
-        description: videoDescription,
-        videoUrl: publicUrl
-      };
-      
-      setVideoStats(processedStats);
-      setUploadProgress(100);
-      
-      // Send the data to the data store for the Data Overview page
-      addVideoAnalysis({
-        date: new Date().toISOString(),
-        title: videoTitle,
-        description: videoDescription,
-        saves: saves.length,
-        goals: goals.length,
-        videoStats: processedStats
-      });
-      
-      toast({
-        title: "Analysis complete",
-        description: `Found ${saves.length} saves and ${goals.length} goals.`
-      });
-      
-      // Reset progress after showing 100% briefly
-      setTimeout(() => {
-        setIsUploading(false);
-      }, 1000);
+        }
+      }, 2000);
       
     } catch (error) {
       console.error("Error uploading video:", error);
