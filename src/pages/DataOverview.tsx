@@ -31,6 +31,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Link } from "react-router-dom";
+import { VideoAnalysisModal } from "@/components/VideoAnalysisModal";
 
 const matchFormSchema = z.object({
   date: z.string().min(1, "Date is required"),
@@ -69,6 +70,8 @@ const DataOverview = () => {
   const { toast } = useToast();
   
   const hasSetLastMatch = useRef(false);
+  
+  const [isDataVideoDialogOpen, setIsDataVideoDialogOpen] = useState(false);
   
   useEffect(() => {
     if (!hasSetLastMatch.current && matchLogs.length > 100) {
@@ -167,6 +170,11 @@ const DataOverview = () => {
   const openDeleteVideoDialog = (id: string) => {
     setSelectedVideoId(id);
     setIsDeleteVideoDialogOpen(true);
+  };
+  
+  const openDataVideoDialog = (id: string) => {
+    setSelectedVideoId(id);
+    setIsDataVideoDialogOpen(true);
   };
   
   const handleAddMatch = (data: MatchFormValues) => {
@@ -404,7 +412,7 @@ const DataOverview = () => {
                       {video.description && (
                         <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{video.description}</p>
                       )}
-                      <div className="flex items-center justify-between gap-4">
+                      <div className="flex bottom-0 items-center justify-between gap-4">
                         <div className="flex items-center gap-2">
                           <ShieldCheck className="h-5 w-5 text-green-500" />
                           <span className="font-semibold">{video.saves} saves</span>
@@ -413,11 +421,14 @@ const DataOverview = () => {
                           <ShieldAlert className="h-5 w-5 text-red-500" />
                           <span className="font-semibold">{video.goals} goals</span>
                         </div>
-                        <Button variant="outline" size="sm" asChild>
-                          <Link to="/video-upload">
-                            <Video className="h-4 w-4 mr-1" />
-                            View
-                          </Link>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => openDataVideoDialog(video.id)}
+                          className="flex items-center gap-2"
+                        >
+                          <Video className="h-4 w-4" />
+                          <span>View</span>
                         </Button>
                       </div>
                     </CardContent>
@@ -808,6 +819,12 @@ const DataOverview = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <VideoAnalysisModal
+          isOpen={isDataVideoDialogOpen}
+          onClose={() => setIsDataVideoDialogOpen(false)}
+          video={selectedVideo}
+        />
       </div>
     </Layout>
   );
