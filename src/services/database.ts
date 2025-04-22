@@ -485,7 +485,8 @@ export async function addVideoAnalysis(video: Omit<VideoAnalysis, 'id'>): Promis
       analysis: video.videoStats.analysis,
       summary: video.videoStats.summary,
       videoTitle: video.videoStats.title,
-      videoDescription: video.videoStats.description
+      videoDescription: video.videoStats.description,
+      videoEventData: video.videoStats.events || [] // Add videoEventData during initial insert
     });
     
     if (videoError) throw videoError;

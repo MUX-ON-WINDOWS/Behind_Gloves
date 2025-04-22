@@ -78,6 +78,11 @@ export interface VideoAnalysis {
     analysis: string;
     saves: { timestamp: string; description: string }[];
     goals: { timestamp: string; description: string }[];
+    events?: Array<{
+      type: 'save' | 'goal';
+      timestamp: string;
+      description: string;
+    }>;
     summary: string;
     title?: string;
     description?: string;

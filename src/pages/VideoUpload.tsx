@@ -23,6 +23,11 @@ export default function VideoUpload() {
     analysis: string;
     saves: { timestamp: string; description: string }[];
     goals: { timestamp: string; description: string }[];
+    events: Array<{
+      type: 'save' | 'goal';
+      timestamp: string;
+      description: string;
+    }>;
     summary: string;
     title?: string;
     description?: string;
@@ -118,9 +123,10 @@ export default function VideoUpload() {
         throw new Error('Failed to upload video');
       }
       
-      const { videoId } = await uploadResponse.json();
+      const { videoId, analysisId } = await uploadResponse.json();
 
-      console.log("Video ID: " + videoId);
+      console.log("Video ID (filename):", videoId);
+      console.log("Analysis ID (UUID):", analysisId);
       
       // Poll for analysis results
       const pollInterval = setInterval(async () => {
@@ -146,8 +152,8 @@ export default function VideoUpload() {
             setVideoStats(processedStats);
             setUploadProgress(100);
             
-            // Send the data to the data store for the Data Overview page
-            addVideoAnalysis({
+            // Send the data to the data store for the Data Overview page and get the ID
+            const analysisId = await addVideoAnalysis({
               date: new Date().toISOString(),
               title: videoTitle,
               description: videoDescription,
@@ -156,12 +162,77 @@ export default function VideoUpload() {
               videoStats: processedStats
             });
             
+            // Upload events data to Supabase
+            try {
+              if (analysisId === null) {
+                console.error('Failed to get analysis ID from addVideoAnalysis');
+                return;
+              }
+
+              console.log('Analysis ID being used for update:', analysisId);
+              
+              // Format the events data as a proper JSON array
+              const formattedEvents = results.data.events.map(event => ({
+                type: event.type,
+                timestamp: event.timestamp,
+                description: event.description
+              }));
+
+              console.log('Formatted events data:', JSON.stringify(formattedEvents, null, 2));
+              
+              if (!formattedEvents || formattedEvents.length === 0) {
+                console.error('Events data is empty or invalid');
+                return;
+              }
+
+              // Update the record with the new events data
+              const { error, data } = await supabase
+                .from('VideoAnalysis')
+                .update({
+                  videoEventData: formattedEvents,
+                  VideoSaves: results.data.saves,
+                  VideoGoals: results.data.goals
+                })
+                .eq('id', analysisId)
+                .select();
+              
+              console.log('Supabase update payload:', {
+                videoEventData: formattedEvents,
+                VideoSaves: results.data.saves,
+                VideoGoals: results.data.goals
+              });
+              console.log('Supabase update response:', { error, data });
+                
+              if (error) {
+                console.error('Error updating video events in Supabase:', error);
+                toast({
+                  title: "Warning",
+                  description: `Database update failed: ${error.message}`,
+                  variant: "destructive",
+                });
+              } else {
+                console.log('Successfully updated video events in Supabase');
+                toast({
+                  title: "Success",
+                  description: "Video analysis data saved successfully",
+                });
+              }
+            } catch (error) {
+              console.error('Error updating video events in Supabase:', error);
+              toast({
+                title: "Error",
+                description: "Failed to save video analysis data",
+                variant: "destructive",
+              });
+            }
+            
             toast({
               title: "Analysis complete",
               description: `Found ${results.data.saves} saves and ${results.data.goals} goals.`
             });
             
-            console.log(results.data + " - " + results.data.events);
+            console.log('Analysis results:', JSON.stringify(results.data, null, 2));
+            console.log('Events:', JSON.stringify(results.data.events, null, 2));
 
             // Reset progress after showing 100% briefly
             setTimeout(() => {

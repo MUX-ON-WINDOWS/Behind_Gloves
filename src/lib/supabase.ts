@@ -34,4 +34,3 @@ export const checkSupabaseConnection = async () => {
     return false;
   }
 };
-// postgresql://postgres.byfnoivaiavwthgwooui:[YOUR-PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres
