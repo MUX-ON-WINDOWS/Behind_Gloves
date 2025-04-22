@@ -385,6 +385,7 @@ export async function fetchVideoAnalyses(): Promise<VideoAnalysis[]> {
               summary: video.summary || '',
               title: video.videoTitle || video.title || '',
               description: video.videoDescription || video.description || '',
+              events: video.videoEventData || [],
               saves: [],
               goals: []
             }
@@ -411,6 +412,7 @@ export async function fetchVideoAnalyses(): Promise<VideoAnalysis[]> {
               summary: video.summary || '',
               title: video.videoTitle || video.title || '',
               description: video.videoDescription || video.description || '',
+              events: video.videoEventData || [],
               saves: savesData || [],
               goals: []
             }
@@ -430,6 +432,7 @@ export async function fetchVideoAnalyses(): Promise<VideoAnalysis[]> {
             summary: video.summary || '',
             title: video.videoTitle || video.title || '',
             description: video.videoDescription || video.description || '',
+            events: video.videoEventData || [],
             saves: (savesData || []).map(save => ({
               timestamp: save.timestamp,
               description: save.description
@@ -455,6 +458,7 @@ export async function fetchVideoAnalyses(): Promise<VideoAnalysis[]> {
             summary: video.summary || '',
             title: video.videoTitle || video.title || '',
             description: video.videoDescription || video.description || '',
+            events: video.videoEventData || [],
             saves: [],
             goals: []
           }

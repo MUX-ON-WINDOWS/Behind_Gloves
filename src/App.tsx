@@ -12,6 +12,7 @@ import Settings from "./pages/Settings";
 import DataOverview from "./pages/DataOverview";
 import VideoUpload from "./pages/VideoUpload";
 import NotFound from "./pages/NotFound";
+import Shotmap from "./pages/ShotMap";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/performance" element={<Performance />} />
+            <Route path="/shotmap" element={<Shotmap />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/data-overview" element={<DataOverview />} />

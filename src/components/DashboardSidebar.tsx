@@ -1,4 +1,3 @@
-
 import { 
   Sidebar, 
   SidebarContent,
@@ -8,7 +7,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton
 } from "@/components/ui/sidebar";
-import { BarChart, LineChart, Settings, User, Calendar, Video } from "lucide-react";
+import { BarChart, LineChart, Settings, User, Calendar, Video, Map } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/hooks/useTheme";
 import { Link, useLocation } from "react-router-dom";
@@ -25,14 +24,19 @@ const navItems = [
     path: "/data-overview"
   },
   {
-    title: "Performance",
-    icon: LineChart,
-    path: "/performance"
-  },
-  {
     title: "Video Analysis",
     icon: Video,
     path: "/video-upload"
+  },
+  {
+    title: "Shotmap",
+    icon: Map,
+    path: "/shotmap"
+  },
+  {
+    title: "Performance",
+    icon: LineChart,
+    path: "/performance"
   },
   {
     title: "Profile",
