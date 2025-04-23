@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, ShieldAlert, Video, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from 'react-router-dom';
 
 interface VideoAnalysis {
   id: string;
@@ -21,6 +22,8 @@ interface VideoAnalysisModalProps {
 
 export const VideoAnalysisModal = ({ isOpen, onClose, video }: VideoAnalysisModalProps) => {
   if (!video) return null;
+
+  const navigate = useNavigate();
 
   return (
     <AnimatePresence>
@@ -107,6 +110,9 @@ export const VideoAnalysisModal = ({ isOpen, onClose, video }: VideoAnalysisModa
               </div>
 
               <DialogFooter>
+                <Button variant="outline" onClick={() => navigate(`/shotmap/${video.id}`)}>
+                  Shotmap
+                </Button>
                 <Button variant="outline" onClick={onClose}>
                   Close
                 </Button>

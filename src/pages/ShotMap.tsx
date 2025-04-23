@@ -1,10 +1,19 @@
 import { Layout } from "@/components/Layout";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useDataStore } from "@/lib/data-store";
+import { useParams } from 'react-router-dom';
 
 export default function Shotmap() {
   const { videoAnalyses, isLoading } = useDataStore();
   const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(null);
+  const { id: routeId } = useParams();
+
+  // Read optional ID from URL via react-router-dom
+  useEffect(() => {
+    if (routeId) {
+      setSelectedAnalysisId(routeId);
+    }
+  }, [routeId]);
 
   // Get the selected analysis
   const selectedVideo = videoAnalyses.find(v => v.id === selectedAnalysisId);
@@ -73,15 +82,9 @@ export default function Shotmap() {
 
     if (evt.type === 'save') {
       return (
-        <circle
-          key={idx}
-          cx={x}
-          cy={y}
-          r={2}
-          fill="#4299e1"
-          opacity={0.8}
-          strokeWidth={0.5}
-        />
+        <svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet" width="200" height="200">
+          <circle cx={x} cy={y} r={2} fill="#35A6E2" opacity={0.8} />
+        </svg>
       );
     }
 
@@ -103,24 +106,27 @@ export default function Shotmap() {
     <Layout>
       <div className="space-y-6">
         <h1 className="text-2xl font-bold">Season Shot Map</h1>
-        <div className="flex items-center gap-4">
-          <label htmlFor="analysis-select" className="font-medium">Select Analysis:</label>
-          <select
-            id="analysis-select"
-            value={selectedAnalysisId || ""}
-            onChange={(e) => setSelectedAnalysisId(e.target.value || null)}
-            className="border rounded px-2 py-1"
-          >
-            <option value="">-- Choose Analysis --</option>
-            {videoAnalyses.map((analysis) => (
-              <option key={analysis.id} value={analysis.id}>
-                {analysis.title || analysis.id.slice(0, 8)}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Only show selector when no direct ID provided in URL */}
+        {!routeId && (
+          <div className="flex items-center gap-4">
+            <label htmlFor="analysis-select" className="font-medium">Select Analysis:</label>
+            <select
+              id="analysis-select"
+              value={selectedAnalysisId || ""}
+              onChange={(e) => setSelectedAnalysisId(e.target.value || null)}
+              className="border rounded px-2 py-1"
+            >
+              <option value="">-- Choose Analysis --</option>
+              {videoAnalyses.map((analysis) => (
+                <option key={analysis.id} value={analysis.id}>
+                  {analysis.title || analysis.id.slice(0, 8)}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
-        {/* Goal diagram shotmap */}
+        {/* Goal diagram shotmap for analysis ID: {selectedAnalysisId} */}
         <div className="w-full h-64">
           <svg
             key={selectedAnalysisId || 'empty'}
