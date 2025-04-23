@@ -23,11 +23,9 @@ const handleSupabaseError = (error: any, operation: string) => {
 
 // Goals Conceded Data
 export async function fetchGoalsConcededData(): Promise<GoalsConcededDataPoint[]> {
-  console.log('Fetching goals conceded data...');
   try {
     const { data, error } = await supabase.from('GoalsConcededData').select('*');
     if (error) throw error;
-    console.log('Fetched goals conceded data:', data);
     return data || [];
   } catch (error) {
     return handleSupabaseError(error, 'fetching goals conceded data');
@@ -35,7 +33,6 @@ export async function fetchGoalsConcededData(): Promise<GoalsConcededDataPoint[]
 }
 
 export async function updateGoalsConcededData(data: GoalsConcededDataPoint[]): Promise<void> {
-  console.log('Updating goals conceded data:', data);
   try {
     // First delete all existing entries
     const { error: deleteError } = await supabase.from('GoalsConcededData').delete().neq('name', 'dummy_value');
@@ -46,7 +43,6 @@ export async function updateGoalsConcededData(data: GoalsConcededDataPoint[]): P
       const { error: insertError } = await supabase.from('GoalsConcededData').insert(data);
       if (insertError) throw insertError;
     }
-    console.log('Goals conceded data updated successfully');
   } catch (error) {
     handleSupabaseError(error, 'updating goals conceded data');
   }
@@ -54,11 +50,9 @@ export async function updateGoalsConcededData(data: GoalsConcededDataPoint[]): P
 
 // Saves Made Data
 export async function fetchSavesMadeData(): Promise<SavesMadeDataPoint[]> {
-  console.log('Fetching saves made data...');
   try {
     const { data, error } = await supabase.from('SavesMadeData').select('*');
     if (error) throw error;
-    console.log('Fetched saves made data:', data);
     return data || [];
   } catch (error) {
     return handleSupabaseError(error, 'fetching saves made data');
@@ -66,7 +60,6 @@ export async function fetchSavesMadeData(): Promise<SavesMadeDataPoint[]> {
 }
 
 export async function updateSavesMadeData(data: SavesMadeDataPoint[]): Promise<void> {
-  console.log('Updating saves made data:', data);
   try {
     // First delete all existing entries
     const { error: deleteError } = await supabase.from('SavesMadeData').delete().neq('name', 'dummy_value');
@@ -77,7 +70,6 @@ export async function updateSavesMadeData(data: SavesMadeDataPoint[]): Promise<v
       const { error: insertError } = await supabase.from('SavesMadeData').insert(data);
       if (insertError) throw insertError;
     }
-    console.log('Saves made data updated successfully');
   } catch (error) {
     handleSupabaseError(error, 'updating saves made data');
   }
@@ -85,11 +77,9 @@ export async function updateSavesMadeData(data: SavesMadeDataPoint[]): Promise<v
 
 // Shot Position Data
 export async function fetchShotPositionData(): Promise<ShotPositionDataPoint[]> {
-  console.log('Fetching shot position data...');
   try {
     const { data, error } = await supabase.from('ShotPositionData').select('*');
     if (error) throw error;
-    console.log('Fetched shot position data:', data);
     return data || [];
   } catch (error) {
     return handleSupabaseError(error, 'fetching shot position data');
@@ -97,7 +87,6 @@ export async function fetchShotPositionData(): Promise<ShotPositionDataPoint[]> 
 }
 
 export async function updateShotPositionData(data: ShotPositionDataPoint[]): Promise<void> {
-  console.log('Updating shot position data:', data);
   try {
     // First delete all existing entries
     const { error: deleteError } = await supabase.from('ShotPositionData').delete().neq('name', 'dummy_value');
@@ -108,7 +97,6 @@ export async function updateShotPositionData(data: ShotPositionDataPoint[]): Pro
       const { error: insertError } = await supabase.from('ShotPositionData').insert(data);
       if (insertError) throw insertError;
     }
-    console.log('Shot position data updated successfully');
   } catch (error) {
     handleSupabaseError(error, 'updating shot position data');
   }
@@ -116,11 +104,9 @@ export async function updateShotPositionData(data: ShotPositionDataPoint[]): Pro
 
 // Performance Summary
 export async function fetchPerformanceSummary(): Promise<PerformanceSummary> {
-  console.log('Fetching performance summary...');
   try {
     const { data, error } = await supabase.from('PerformanceSummary').select('*').order('id', { ascending: false }).limit(1);
     if (error) throw error;
-    console.log('Fetched performance summary:', data);
     return data[0] || {
       matches: 0,
       totalSaves: 0,
@@ -134,7 +120,6 @@ export async function fetchPerformanceSummary(): Promise<PerformanceSummary> {
 }
 
 export async function updatePerformanceSummary(summary: PerformanceSummary): Promise<void> {
-  // console.log('Updating performance summary:', summary);
   try {
     // Check if any record exists
     const { data, error: checkError } = await supabase.from('PerformanceSummary').select('id').limit(1);
@@ -150,7 +135,6 @@ export async function updatePerformanceSummary(summary: PerformanceSummary): Pro
       const { error } = await supabase.from('PerformanceSummary').insert(summary);
       if (error) throw error;
     }
-    console.log('Performance summary updated successfully');
   } catch (error) {
     handleSupabaseError(error, 'updating performance summary');
   }
@@ -158,11 +142,9 @@ export async function updatePerformanceSummary(summary: PerformanceSummary): Pro
 
 // Last Match
 export async function fetchLastMatch(): Promise<LastMatch> {
-  console.log('Fetching last match...');
   try {
     const { data, error } = await supabase.from('LastMatch').select('*').order('id', { ascending: false }).limit(1);
     if (error) throw error;
-    console.log('Fetched last match:', data);
     
     const lastMatch = data[0] || {
       homeTeam: '',
@@ -186,7 +168,6 @@ export async function fetchLastMatch(): Promise<LastMatch> {
 }
 
 export async function updateLastMatch(match: LastMatch): Promise<void> {
-  // console.log('Updating last match:', match);
   try {
     // Check if any record exists
     const { data, error: checkError } = await supabase.from('LastMatch').select('id').limit(1);
@@ -202,7 +183,6 @@ export async function updateLastMatch(match: LastMatch): Promise<void> {
       const { error } = await supabase.from('LastMatch').insert(match);
       if (error) throw error;
     }
-    console.log('Last match updated successfully');
   } catch (error) {
     handleSupabaseError(error, 'updating last match');
   }
@@ -210,11 +190,9 @@ export async function updateLastMatch(match: LastMatch): Promise<void> {
 
 // Upcoming Match
 export async function fetchUpcomingMatch(): Promise<UpcomingMatch> {
-  console.log('Fetching upcoming match...');
   try {
     const { data, error } = await supabase.from('UpcomingMatch').select('*').order('id', { ascending: false }).limit(1);
     if (error) throw error;
-    console.log('Fetched upcoming match:', data);
     
     const upcomingMatch = data[0] || {
       homeTeam: '',
@@ -237,7 +215,6 @@ export async function fetchUpcomingMatch(): Promise<UpcomingMatch> {
 }
 
 export async function updateUpcomingMatch(match: UpcomingMatch): Promise<void> {
-  console.log('Updating upcoming match:', match);
   try {
     // Check if any record exists
     const { data, error: checkError } = await supabase.from('UpcomingMatch').select('id').limit(1);
@@ -253,7 +230,6 @@ export async function updateUpcomingMatch(match: UpcomingMatch): Promise<void> {
       const { error } = await supabase.from('UpcomingMatch').insert(match);
       if (error) throw error;
     }
-    console.log('Upcoming match updated successfully');
   } catch (error) {
     handleSupabaseError(error, 'updating upcoming match');
   }
@@ -261,11 +237,9 @@ export async function updateUpcomingMatch(match: UpcomingMatch): Promise<void> {
 
 // Team Scoreboard
 export async function fetchTeamScoreboard(): Promise<TeamData[]> {
-  console.log('Fetching team scoreboard...');
   try {
     const { data, error } = await supabase.from('TeamScoreboard').select('*').order('position', { ascending: true });
     if (error) throw error;
-    console.log('Fetched team scoreboard:', data);
     return data || [];
   } catch (error) {
     return handleSupabaseError(error, 'fetching team scoreboard');
@@ -273,7 +247,6 @@ export async function fetchTeamScoreboard(): Promise<TeamData[]> {
 }
 
 export async function updateTeamScoreboard(teams: TeamData[]): Promise<void> {
-  console.log('Updating team scoreboard:', teams);
   try {
     // First delete all existing entries
     const { error: deleteError } = await supabase.from('TeamScoreboard').delete().neq('team', 'dummy_value');
@@ -284,7 +257,6 @@ export async function updateTeamScoreboard(teams: TeamData[]): Promise<void> {
       const { error: insertError } = await supabase.from('TeamScoreboard').insert(teams);
       if (insertError) throw insertError;
     }
-    console.log('Team scoreboard updated successfully');
   } catch (error) {
     handleSupabaseError(error, 'updating team scoreboard');
   }
@@ -292,11 +264,9 @@ export async function updateTeamScoreboard(teams: TeamData[]): Promise<void> {
 
 // Match Logs
 export async function fetchMatchLogs(): Promise<MatchLog[]> {
-  console.log('Fetching match logs...');
   try {
     const { data, error } = await supabase.from('MatchLog').select('*').order('date', { ascending: false });
     if (error) throw error;
-    console.log('Fetched match logs:', data);
     // Convert dates to string format
     return (data || []).map(match => ({
       ...match,
@@ -308,14 +278,12 @@ export async function fetchMatchLogs(): Promise<MatchLog[]> {
 }
 
 export async function addMatchLog(match: Omit<MatchLog, 'id'>): Promise<string | null> {
-  console.log('Adding match log:', match);
   try {
     const newId = crypto.randomUUID();
     const newMatch = { ...match, id: newId };
     
     const { error } = await supabase.from('MatchLog').insert(newMatch);
     if (error) throw error;
-    console.log('Match log added successfully with ID:', newId);
     return newId;
   } catch (error) {
     handleSupabaseError(error, 'adding match log');
@@ -324,22 +292,18 @@ export async function addMatchLog(match: Omit<MatchLog, 'id'>): Promise<string |
 }
 
 export async function updateMatchLog(id: string, match: Partial<MatchLog>): Promise<void> {
-  console.log('Updating match log:', id, match);
   try {
     const { error } = await supabase.from('MatchLog').update(match).eq('id', id);
     if (error) throw error;
-    console.log('Match log updated successfully');
   } catch (error) {
     handleSupabaseError(error, 'updating match log');
   }
 }
 
 export async function deleteMatchLog(id: string): Promise<void> {
-  console.log('Deleting match log:', id);
   try {
     const { error } = await supabase.from('MatchLog').delete().eq('id', id);
     if (error) throw error;
-    console.log('Match log deleted successfully');
   } catch (error) {
     handleSupabaseError(error, 'deleting match log');
   }
@@ -347,7 +311,6 @@ export async function deleteMatchLog(id: string): Promise<void> {
 
 // Video Analysis
 export async function fetchVideoAnalyses(): Promise<VideoAnalysis[]> {
-  console.log('Fetching video analyses...');
   try {
     // First fetch the main video analysis data
     const { data: videoData, error: videoError } = await supabase
@@ -356,7 +319,6 @@ export async function fetchVideoAnalyses(): Promise<VideoAnalysis[]> {
       .order('date', { ascending: false });
       
     if (videoError) throw videoError;
-    console.log('Fetched video analyses:', videoData);
     
     if (!videoData || videoData.length === 0) {
       return [];
@@ -385,7 +347,9 @@ export async function fetchVideoAnalyses(): Promise<VideoAnalysis[]> {
               summary: video.summary || '',
               title: video.videoTitle || video.title || '',
               description: video.videoDescription || video.description || '',
-              events: video.videoEventData || [],
+              events: Array.isArray(video.videoEventData)
+                ? video.videoEventData
+                : (video.videoEventData?.events || []),
               saves: [],
               goals: []
             }
@@ -412,7 +376,9 @@ export async function fetchVideoAnalyses(): Promise<VideoAnalysis[]> {
               summary: video.summary || '',
               title: video.videoTitle || video.title || '',
               description: video.videoDescription || video.description || '',
-              events: video.videoEventData || [],
+              events: Array.isArray(video.videoEventData)
+                ? video.videoEventData
+                : (video.videoEventData?.events || []),
               saves: savesData || [],
               goals: []
             }
@@ -432,7 +398,9 @@ export async function fetchVideoAnalyses(): Promise<VideoAnalysis[]> {
             summary: video.summary || '',
             title: video.videoTitle || video.title || '',
             description: video.videoDescription || video.description || '',
-            events: video.videoEventData || [],
+            events: Array.isArray(video.videoEventData)
+              ? video.videoEventData
+              : (video.videoEventData?.events || []),
             saves: (savesData || []).map(save => ({
               timestamp: save.timestamp,
               description: save.description
@@ -458,7 +426,9 @@ export async function fetchVideoAnalyses(): Promise<VideoAnalysis[]> {
             summary: video.summary || '',
             title: video.videoTitle || video.title || '',
             description: video.videoDescription || video.description || '',
-            events: video.videoEventData || [],
+            events: Array.isArray(video.videoEventData)
+              ? video.videoEventData
+              : (video.videoEventData?.events || []),
             saves: [],
             goals: []
           }
@@ -473,7 +443,6 @@ export async function fetchVideoAnalyses(): Promise<VideoAnalysis[]> {
 }
 
 export async function addVideoAnalysis(video: Omit<VideoAnalysis, 'id'>): Promise<string | null> {
-  console.log('Adding video analysis:', video);
   try {
     // Generate a new UUID for the video
     const newId = crypto.randomUUID();
@@ -485,12 +454,13 @@ export async function addVideoAnalysis(video: Omit<VideoAnalysis, 'id'>): Promis
       title: video.title,
       description: video.description,
       saves: video.saves,
+      VideoSaves: video.saves,
       goals: video.goals,
+      VideoGoals: video.goals,
       analysis: video.videoStats.analysis,
       summary: video.videoStats.summary,
       videoTitle: video.videoStats.title,
-      videoDescription: video.videoStats.description,
-      videoEventData: video.videoStats.events || [] // Add videoEventData during initial insert
+      videoEventData: video.videoStats.events || []
     });
     
     if (videoError) throw videoError;
@@ -519,7 +489,6 @@ export async function addVideoAnalysis(video: Omit<VideoAnalysis, 'id'>): Promis
       if (goalsError) throw goalsError;
     }
     
-    console.log('Video analysis added successfully with ID:', newId);
     return newId;
   } catch (error) {
     handleSupabaseError(error, 'adding video analysis');
@@ -528,7 +497,6 @@ export async function addVideoAnalysis(video: Omit<VideoAnalysis, 'id'>): Promis
 }
 
 export async function deleteVideoAnalysis(id: string): Promise<void> {
-  console.log('Deleting video analysis:', id);
   try {
     // First delete related saves and goals (due to foreign key constraints)
     const { error: savesError } = await supabase.from('VideoSaves').delete().eq('videoId', id);
@@ -549,11 +517,9 @@ export async function deleteVideoAnalysis(id: string): Promise<void> {
 
 // User Settings
 export async function fetchUserSettings(): Promise<UserSettings> {
-  console.log('Fetching user settings...');
   try {
     const { data, error } = await supabase.from('UserSettings').select('*').order('id', { ascending: false }).limit(1);
     if (error) throw error;
-    console.log('Fetched user settings:', data);
     return data[0] || { clubTeam: 'VV Dongen' };
   } catch (error) {
     return handleSupabaseError(error, 'fetching user settings');
@@ -561,7 +527,6 @@ export async function fetchUserSettings(): Promise<UserSettings> {
 }
 
 export async function updateUserSettings(settings: UserSettings): Promise<void> {
-  console.log('Updating user settings:', settings);
   try {
     // Check if any record exists
     const { data, error: checkError } = await supabase.from('UserSettings').select('id').limit(1);

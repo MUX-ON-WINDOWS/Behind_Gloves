@@ -42,7 +42,7 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
           setConnectionError(null);
         }
       } catch (error) {
-        console.error('Database connection check failed:', error);
+        // console.error('Database connection check failed:', error);
         setConnectionError('Error checking database connection');
       }
     };
@@ -95,7 +95,7 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
       
       await matchState.setTeamScoreboard(updatedTeamScoreboard);
     } catch (error) {
-      console.error('Failed to recalculate performance summary:', error);
+      // console.error('Failed to recalculate performance summary:', error);
       toast({
         variant: "destructive",
         title: "Update failed",
@@ -115,7 +115,7 @@ export const DataStoreProvider = ({ children }: { children: ReactNode }) => {
           performanceState.setSavesMadeData(savesMadeData)
         ]);
       } catch (error) {
-        console.error('Failed to update chart data:', error);
+        // console.error('Failed to update chart data:', error);  
         toast({
           variant: "destructive",
           title: "Update failed",

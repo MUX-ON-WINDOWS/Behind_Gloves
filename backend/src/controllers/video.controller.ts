@@ -132,7 +132,7 @@ async function analyzeVideo(videoId: string, videoUrl: string) {
             text: `You are a soccer video analyst. Analyze this soccer goalie video and identify all saves and goals. For each event, provide:
             1. The type (save or goal)
             2. The timestamp in MM:SS format
-            3. A brief description of what happened
+            3. Say where the ball whent, like top left or top right etc
             
             IMPORTANT: Respond ONLY with a JSON object in this exact format:
             {
