@@ -36,6 +36,10 @@ export default function Shotmap() {
     events = (rawEvents as any).events;
   }
 
+  const saveCount = events.filter(evt => evt.type === 'save').length;
+  const goalCount = events.filter(evt => evt.type === 'goal').length;
+  const missCount = events.filter(evt => evt.type === 'miss').length;
+
   // Precompute net grid lines with useMemo
   const gridLines = useMemo(() => {
     const horizontal = [...Array(4)].map((_, i) => (
@@ -82,9 +86,14 @@ export default function Shotmap() {
 
     if (evt.type === 'save') {
       return (
-        <svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet" width="200" height="200">
-          <circle cx={x} cy={y} r={2} fill="#35A6E2" opacity={0.8} />
-        </svg>
+        <circle
+          key={idx}
+          cx={x}
+          cy={y}
+          r={2}
+          fill="#35A6E2"
+          opacity={0.8}
+        />
       );
     }
 
@@ -141,6 +150,24 @@ export default function Shotmap() {
             {/* Event markers */}
             {events.map((evt, idx) => renderEventMarker(evt, idx))}
           </svg>
+        </div>
+      </div>
+      <div className="w-full h-64">
+        <h1>Shot Map</h1>
+        <div className="w-full h-32 flex flex-row gap-4 ">
+          <div className="w-full h-full text-center border rounded-lg bg-gray-100">
+            <h2 className="text-lg font-bold">Save</h2>
+            <p className="text-2xl font-bold">{saveCount}</p> 
+          </div>
+          <div className="w-full h-full border rounded-lg bg-gray-100">
+            <h2 className="text-lg font-bold">Goal</h2>
+            <p className="text-2xl font-bold">{goalCount}</p>
+          </div>
+          <div className="w-full h-full border rounded-lg bg-gray-100">
+            <h2 className="text-lg font-bold">Miss</h2>
+            <p className="text-2xl font-bold">{missCount}</p>
+          </div>
+
         </div>
       </div>
     </Layout>
