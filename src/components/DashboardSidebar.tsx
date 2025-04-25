@@ -5,12 +5,15 @@ import {
   SidebarTrigger,
   SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuButton
+  SidebarMenuButton,
+  SidebarSeparator,
+  SidebarFooter
 } from "@/components/ui/sidebar";
-import { BarChart, LineChart, Settings, User, Calendar, Video, Map } from "lucide-react";
+import { BarChart, LineChart, Settings, User, Calendar, Video, Map, LogOut, ChartScatter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/hooks/useTheme";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   {
@@ -30,14 +33,14 @@ const navItems = [
   },
   {
     title: "Shotmap",
-    icon: Map,
+    icon: ChartScatter,
     path: "/shotmap"
   },
-  {
-    title: "Performance",
-    icon: LineChart,
-    path: "/performance"
-  },
+  // {
+  //   title: "Performance",
+  //   icon: LineChart,
+  //   path: "/performance"
+  // },
   {
     title: "Profile",
     icon: User,
@@ -53,6 +56,7 @@ const navItems = [
 export const DashboardSidebar = ({ className }: { className?: string }) => {
   const { theme } = useTheme();
   const location = useLocation();
+  const { logout } = useAuth();
   
   return (
     <Sidebar className={cn(className)}>
@@ -70,7 +74,7 @@ export const DashboardSidebar = ({ className }: { className?: string }) => {
                   <Link to={item.path} className="flex items-center gap-3 px-3 py-2">
                     <item.icon size={18} />
                     <span>{item.title}</span>
-                    {item.title === "Data Overview" && <span className="ml-auto text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">Main</span>}
+                    {/* {item.title === "Data Overview" && <span className="ml-auto text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">Main</span>} */}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -78,6 +82,16 @@ export const DashboardSidebar = ({ className }: { className?: string }) => {
           })}
         </SidebarMenu>
       </SidebarContent>
+      <SidebarSeparator />
+      <SidebarFooter>
+        <button
+          onClick={logout}
+          className="flex w-full items-center gap-3 px-3 py-2 text-left hover:text-destructive"
+        >
+          <LogOut size={18} />
+          <span>Logout</span>
+        </button>
+      </SidebarFooter>
     </Sidebar>
   );
 };
