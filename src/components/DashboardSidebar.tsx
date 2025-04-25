@@ -1,7 +1,7 @@
-import { 
-  Sidebar, 
+import {
+  Sidebar,
   SidebarContent,
-  SidebarHeader, 
+  SidebarHeader,
   SidebarTrigger,
   SidebarMenu,
   SidebarMenuItem,
@@ -57,10 +57,10 @@ export const DashboardSidebar = ({ className }: { className?: string }) => {
   const { theme } = useTheme();
   const location = useLocation();
   const { logout } = useAuth();
-  
+
   return (
     <Sidebar className={cn(className)}>
-      <SidebarHeader className="flex items-center justify-between">
+      <SidebarHeader className="flex pl-4 justify-between">
         <h2 className="text-lg font-semibold">Goalie Vision</h2>
         <SidebarTrigger className="md:hidden" />
       </SidebarHeader>

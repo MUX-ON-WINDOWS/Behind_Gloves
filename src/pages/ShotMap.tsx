@@ -2,6 +2,7 @@ import { Layout } from "@/components/Layout";
 import { useState, useMemo, useEffect } from "react";
 import { useDataStore } from "@/lib/data-store";
 import { useParams } from 'react-router-dom';
+import { Hand } from 'lucide-react';
 
 export default function Shotmap() {
   const { videoAnalyses, isLoading } = useDataStore();
@@ -136,12 +137,12 @@ export default function Shotmap() {
         )}
 
         {/* Goal diagram shotmap for analysis ID: {selectedAnalysisId} */}
-        <div className="w-full h-64">
+        <div className="w-full">
           <svg
             key={selectedAnalysisId || 'empty'}
             viewBox="0 0 100 50"
-            preserveAspectRatio="none"
-            className="w-full h-full border rounded-lg bg-gray-100"
+            preserveAspectRatio="xMidYMid meet"
+            className="w-full h-auto border rounded-lg bg-gray-100"
           >
             {/* Goal frame */}
             <rect x={1} y={1} width={98} height={48} fill="none" stroke="#ccc" strokeWidth={0.5} />
@@ -152,22 +153,21 @@ export default function Shotmap() {
           </svg>
         </div>
       </div>
-      <div className="w-full h-64">
-        <h1>Shot Map</h1>
-        <div className="w-full h-32 flex flex-row gap-4 ">
-          <div className="w-full h-full text-center border rounded-lg bg-gray-100">
-            <h2 className="text-lg font-bold">Save</h2>
-            <p className="text-2xl font-bold">{saveCount}</p> 
+      <div className="space-y-4">
+        <h1 className="text-2xl font-bold text-center">Shot Map Summary</h1>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="p-4 flex flex-col items-center bg-gray-100 border rounded-lg">
+            <h2 className="text-lg font-semibold">Save</h2>
+            <p className="text-3xl font-bold">{saveCount}</p>
           </div>
-          <div className="w-full h-full border rounded-lg bg-gray-100">
-            <h2 className="text-lg font-bold">Goal</h2>
-            <p className="text-2xl font-bold">{goalCount}</p>
+          <div className="p-4 flex flex-col items-center bg-gray-100 border rounded-lg">
+            <h2 className="text-lg font-semibold">Goal</h2>
+            <p className="text-3xl font-bold">{goalCount}</p>
           </div>
-          <div className="w-full h-full border rounded-lg bg-gray-100">
-            <h2 className="text-lg font-bold">Miss</h2>
-            <p className="text-2xl font-bold">{missCount}</p>
+          <div className="p-4 flex flex-col items-center bg-gray-100 border rounded-lg">
+            <h2 className="text-lg font-semibold">Miss</h2>
+            <p className="text-3xl font-bold">{missCount}</p>
           </div>
-
         </div>
       </div>
     </Layout>

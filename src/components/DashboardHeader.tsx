@@ -10,7 +10,7 @@ export const DashboardHeader = () => {
           <p className="text-sm text-muted-foreground">Performance metrics and visualization</p>
         </div>
         <div className="flex items-center gap-2">
-          <ThemeToggle />
+          {/* <ThemeToggle /> */}
         </div>
       </div>
     </header>
