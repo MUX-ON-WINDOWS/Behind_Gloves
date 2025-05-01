@@ -14,14 +14,14 @@ import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({
-    fullName: "Alex James Morgan",
-    location: "Manchester, United Kingdom",
-    email: "alex.morgan@fcunited.com",
-    phone: "+44 7123 456789",
-    height: "6'2\" (188 cm)",
-    weight: "185 lbs (84 kg)",
-    age: 27,
-    nationality: "British",
+    fullName: "Max Arnouts",
+    location: "Dongen, Nederland",
+    email: "-",
+    phone: "-",
+    height: "182 cm",
+    weight: "66 kg",
+    age: 22,
+    nationality: "Nederlands",
     joined: "August 2021",
     contractUntil: "June 2026",
     preferredHand: "Right",
@@ -54,11 +54,6 @@ const Profile = () => {
             </Avatar>
             <div>
               <h2 className="text-3xl font-bold tracking-tight">{profile.fullName}</h2>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Badge variant="outline">Goalkeeper</Badge>
-                <Badge variant="outline">FC United</Badge>
-                <Badge variant="outline">#1</Badge>
-              </div>
             </div>
           </div>
           <div className="flex gap-2">
@@ -176,14 +171,7 @@ const Profile = () => {
           </Card>
         </div>
         
-        <Tabs defaultValue="stats" className="w-full">
-          <TabsList className="mb-4 grid grid-cols-4 md:w-auto">
-            <TabsTrigger value="stats">Statistics</TabsTrigger>
-            <TabsTrigger value="training">Training</TabsTrigger>
-            <TabsTrigger value="medical">Medical</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
-          </TabsList>
-          
+        <Tabs defaultValue="stats" className="w-full">          
           <TabsContent value="stats">
             <Card>
               <CardHeader>
@@ -252,49 +240,7 @@ const Profile = () => {
               </CardContent>
             </Card>
           </TabsContent>
-          
-          <TabsContent value="training">
-            <Card>
-              <CardHeader>
-                <CardTitle>Training Data</CardTitle>
-                <CardDescription>Recent training performance</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p>Training statistics and performance metrics will be displayed here.</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="medical">
-            <Card>
-              <CardHeader>
-                <CardTitle>Medical Records</CardTitle>
-                <CardDescription>Health and injury history</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p>Medical records and injury history will be displayed here.</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="history">
-            <Card>
-              <CardHeader>
-                <CardTitle>Career History</CardTitle>
-                <CardDescription>Previous clubs and achievements</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p>Career history and previous club information will be displayed here.</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+          </Tabs>
       </div>
 
       {/* Edit Profile Dialog */}

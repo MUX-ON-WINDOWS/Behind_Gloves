@@ -3,11 +3,13 @@ import { useState, useMemo, useEffect } from "react";
 import { useDataStore } from "@/lib/data-store";
 import { useParams } from 'react-router-dom';
 import { Hand } from 'lucide-react';
+import { useTheme } from "@/hooks/useTheme";
 
 export default function Shotmap() {
   const { videoAnalyses, isLoading } = useDataStore();
   const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(null);
   const { id: routeId } = useParams();
+  const { theme } = useTheme();
 
   // Read optional ID from URL via react-router-dom
   useEffect(() => {
@@ -43,6 +45,7 @@ export default function Shotmap() {
 
   // Precompute net grid lines with useMemo
   const gridLines = useMemo(() => {
+    const gridColor = theme === 'dark' ? '#374151' : '#eee';
     const horizontal = [...Array(4)].map((_, i) => (
       <line
         key={`h-${i}`}
@@ -50,7 +53,7 @@ export default function Shotmap() {
         y1={((i + 1) / 5) * 50}
         x2={99}
         y2={((i + 1) / 5) * 50}
-        stroke="#eee"
+        stroke={gridColor}
         strokeWidth={0.2}
       />
     ));
@@ -61,12 +64,12 @@ export default function Shotmap() {
         y1={1}
         x2={((i + 1) / 11) * 100}
         y2={49}
-        stroke="#eee"
+        stroke={gridColor}
         strokeWidth={0.2}
       />
     ));
     return [...horizontal, ...vertical];
-  }, []);
+  }, [theme]);
 
   // Map descriptions to base goal coordinates
   const coordMap = {
@@ -124,7 +127,7 @@ export default function Shotmap() {
               id="analysis-select"
               value={selectedAnalysisId || ""}
               onChange={(e) => setSelectedAnalysisId(e.target.value || null)}
-              className="border rounded px-2 py-1"
+              className="border rounded px-2 py-1 bg-background"
             >
               <option value="">-- Choose Analysis --</option>
               {videoAnalyses.map((analysis) => (
@@ -142,10 +145,10 @@ export default function Shotmap() {
             key={selectedAnalysisId || 'empty'}
             viewBox="0 0 100 50"
             preserveAspectRatio="xMidYMid meet"
-            className="w-full h-auto border rounded-lg bg-gray-100"
+            className="w-full h-auto border rounded-lg bg-card"
           >
             {/* Goal frame */}
-            <rect x={1} y={1} width={98} height={48} fill="none" stroke="#ccc" strokeWidth={0.5} />
+            <rect x={1} y={1} width={98} height={48} fill="none" stroke={theme === 'dark' ? '#4B5563' : '#ccc'} strokeWidth={0.5} />
             {/* Net grid */}
             {gridLines}
             {/* Event markers */}
@@ -156,15 +159,15 @@ export default function Shotmap() {
       <div className="space-y-4">
         <h1 className="text-2xl font-bold text-center">Shot Map Summary</h1>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-4 flex flex-col items-center bg-gray-100 border rounded-lg">
+          <div className="p-4 flex flex-col items-center bg-card border rounded-lg">
             <h2 className="text-lg font-semibold">Save</h2>
             <p className="text-3xl font-bold">{saveCount}</p>
           </div>
-          <div className="p-4 flex flex-col items-center bg-gray-100 border rounded-lg">
+          <div className="p-4 flex flex-col items-center bg-card border rounded-lg">
             <h2 className="text-lg font-semibold">Goal</h2>
             <p className="text-3xl font-bold">{goalCount}</p>
           </div>
-          <div className="p-4 flex flex-col items-center bg-gray-100 border rounded-lg">
+          <div className="p-4 flex flex-col items-center bg-card border rounded-lg">
             <h2 className="text-lg font-semibold">Miss</h2>
             <p className="text-3xl font-bold">{missCount}</p>
           </div>
