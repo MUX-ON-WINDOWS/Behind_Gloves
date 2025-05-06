@@ -189,17 +189,17 @@ export default function VideoUpload() {
               const { error, data } = await supabase
                 .from('VideoAnalysis')
                 .update({
-                  videoEventData: formattedEvents,
-                  VideoSaves: results.data.saves,
-                  VideoGoals: results.data.goals
+                  events: formattedEvents,
+                  saves: results.data.saves,
+                  goals: results.data.goals
                 })
                 .eq('id', analysisId)
                 .select();
               
               console.log('Supabase update payload:', {
-                videoEventData: formattedEvents,
-                VideoSaves: results.data.saves,
-                VideoGoals: results.data.goals
+                events: formattedEvents,
+                saves: results.data.saves,
+                goals: results.data.goals
               });
               console.log('Supabase update response:', { error, data });
                 

@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { ShieldCheck, ShieldAlert, Video, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 interface VideoAnalysis {
   id: string;
@@ -11,7 +13,13 @@ interface VideoAnalysis {
   description?: string;
   saves: number;
   goals: number;
-  // Add any other fields you need
+  videoStats: {
+    videoUrl?: string;
+    analysis: string;
+    summary: string;
+    title?: string;
+    description?: string;
+  };
 }
 
 interface VideoAnalysisModalProps {
@@ -21,9 +29,34 @@ interface VideoAnalysisModalProps {
 }
 
 export const VideoAnalysisModal = ({ isOpen, onClose, video }: VideoAnalysisModalProps) => {
-  if (!video) return null;
-
   const navigate = useNavigate();
+  const [videoId, setVideoId] = useState<string>('');
+
+  useEffect(() => {
+    const fetchVideoId = async () => {
+      if (video?.id) {
+        try {
+          const { data, error } = await supabase
+            .from('VideoAnalysis')
+            .select('videoId')
+            .eq('id', video.id)
+            .single();
+
+          if (error) throw error;
+          console.log('Video ID (filename):', data.videoId);
+          setVideoId(data.videoId);
+        } catch (error) {
+          console.error('Error fetching video ID:', error);
+        }
+      }
+    };
+
+    if (isOpen) {
+      fetchVideoId();
+    }
+  }, [isOpen, video?.id]);
+
+  if (!video) return null;
 
   return (
     <AnimatePresence>
@@ -34,7 +67,7 @@ export const VideoAnalysisModal = ({ isOpen, onClose, video }: VideoAnalysisModa
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              transition={{ duration: 0.2 }}
+            // transition={{ duration: 0.2 }}
             >
               <DialogHeader>
                 <div className="flex items-center justify-between">
@@ -107,6 +140,15 @@ export const VideoAnalysisModal = ({ isOpen, onClose, video }: VideoAnalysisModa
                     </div>
                   </div>
                 </div>
+                <div>
+                  <button
+                    onClick={() => window.open(`https://byfnoivaiavwthgwooui.supabase.co/storage/v1/object/public/videos//${videoId}`, '_blank')}
+                    className="px-4 py-2 w-full bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                  >
+                    Watch Video
+                  </button>
+                </div>
+
               </div>
 
               <DialogFooter>

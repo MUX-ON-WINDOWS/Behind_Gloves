@@ -237,6 +237,7 @@ const DataOverview = () => {
   
   const handleDeleteVideoAnalysis = () => {
     if (selectedVideoId) {
+      console.log(selectedVideoId)
       deleteVideoAnalysis(selectedVideoId);
       toast({
         title: "Video Analysis Deleted",

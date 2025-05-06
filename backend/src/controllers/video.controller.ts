@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import path from 'path';
 import { unlink } from 'fs/promises';
 import axios from 'axios';
+import crypto from 'crypto';
 
 // Initialize Supabase client
 const getSupabaseClient = () => {
@@ -16,6 +17,7 @@ const getSupabaseClient = () => {
 const analysisResults = new Map<string, {
   status: 'processing' | 'completed';
   data?: {
+    toneOfVoice: string;
     saves: number;
     goals: number;
     events: Array<{
@@ -68,6 +70,8 @@ export const uploadVideo = async (req: Request, res: Response) => {
 
     // Start analysis in the background
     analyzeVideo(fileName, publicUrl);
+
+    console.log("bestandnaam" + fileName)
     
     return res.status(200).json({ 
       videoId: fileName,
@@ -130,24 +134,25 @@ async function analyzeVideo(videoId: string, videoUrl: string) {
         contents: [{
           parts: [{
             text: `You are a soccer video analyst. Analyze this soccer goalie video and identify all saves and goals. For each event, provide:
-            1. The type (save or goal)
-            2. The timestamp in MM:SS format
-            3. Say where the ball whent, like top left or top right etc
-            
-            IMPORTANT: Respond ONLY with a JSON object in this exact format:
+        1. Tone of voice example: You got so x saves. Goodjob keep it going
+        2. The type (save or goal)
+        3. The timestamp in MM:SS format
+        4. Say where the ball whent, like top left or top right etc dont add extra details
+        IMPORTANT: Respond ONLY with a JSON object in this exact format:
+        {
+          "toneOfVoice": text,
+          "saves": number,
+          "goals": number,
+          "events": [
             {
-              "saves": number,
-              "goals": number,
-              "events": [
-                {
-                  "type": "save" or "goal",
-                  "timestamp": "MM:SS",
-                  "description": "description"
-                }
-              ]
+              "type": "save" or "goal",
+              "timestamp": "MM:SS",
+              "description": "Top left"
             }
-            
-            Do not include any other text or explanation.`
+          ]
+        }
+        
+        Do not include any other text or explanation.`
           }, {
             inlineData: {
               mimeType: "video/mp4",
@@ -194,6 +199,10 @@ async function analyzeVideo(videoId: string, videoUrl: string) {
       throw new Error('Invalid analysis structure: not an object');
     }
 
+    // Extract tone of voice from the response
+    const toneOfVoice = analysis.toneOfVoice || 'Great performance! Keep up the good work!';
+    console.log('Extracted tone of voice:', toneOfVoice);
+
     if (typeof analysis.saves !== 'number') {
       console.error("Invalid saves count:", analysis.saves);
       analysis.saves = 0;
@@ -234,10 +243,48 @@ async function analyzeVideo(videoId: string, videoUrl: string) {
       }
     }
 
-    // Update the results
+    // Store in Supabase database
+    const supabase = getSupabaseClient();
+    try {
+      // Generate a proper UUID for the database record
+      const analysisId = crypto.randomUUID();
+
+      const analysisUrl = videoId;
+      
+      const { data: dbData, error: dbError } = await supabase
+        .from('VideoAnalysis')
+        .insert({
+          id: analysisId,
+          videoId: videoId, // This stores the filename (e.g. "1234567890-abc123.mp4")
+          videoUrl: analysisUrl,
+          toneOfVoice: String(toneOfVoice),
+          saves: analysis.saves || 0,
+          goals: analysis.goals || 0,
+          videoEventData: analysis.events || []
+        })
+        .select()
+        .single();
+
+      if (dbError) {
+        console.error('Error storing analysis in database:', dbError);
+        throw dbError;
+      }
+
+      console.log('Successfully stored analysis in database:', dbData);
+    } catch (error) {
+      console.error('Failed to store analysis in database:', error);
+      // Continue with in-memory storage even if database storage fails
+    }
+
+    // Update the in-memory results
     analysisResults.set(videoId, {
       status: 'completed',
-      data: analysis
+      data: {
+        toneOfVoice,
+        saves: analysis.saves || 0,
+        goals: analysis.goals || 0,
+        events: analysis.events || []
+      }
     });
     
   } catch (error: any) {
@@ -257,6 +304,7 @@ async function analyzeVideo(videoId: string, videoUrl: string) {
     analysisResults.set(videoId, {
       status: 'completed',
       data: {
+        toneOfVoice: 'Great performance! Keep up the good work!',
         saves: 0,
         goals: 0,
         events: []

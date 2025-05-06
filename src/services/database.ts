@@ -447,9 +447,13 @@ export async function addVideoAnalysis(video: Omit<VideoAnalysis, 'id'>): Promis
     // Generate a new UUID for the video
     const newId = crypto.randomUUID();
     
+    const videoUrl = video.videoStats.videoUrl;
+    const videoId = videoUrl.split('/').pop()?.replace('.mp4.mp4', '.mp4') || '';
+    
     // Insert the main video record
     const { error: videoError } = await supabase.from('VideoAnalysis').insert({
       id: newId,
+      videoId: videoId,
       date: video.date,
       title: video.title,
       description: video.description,
