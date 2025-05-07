@@ -1,73 +1,135 @@
-# Welcome to your Lovable project
+# Goalie Vision Charts
 
-## Project info
+A modern web application for analyzing and visualizing hockey goalie performance data, built with React, TypeScript, and Express.
 
-**URL**: https://lovable.dev/projects/66ef7f23-85be-479d-ac2e-371f5fbb238b
+## Project Structure
 
-## How can I edit this code?
+The project consists of two main parts:
+- Frontend: React application with TypeScript and Vite
+- Backend: Express.js server with TypeScript
 
-There are several ways of editing your application.
+## Frontend Features
 
-**Use Lovable**
+- Modern UI built with React and Shadcn UI components
+- TypeScript for type safety
+- Tailwind CSS for styling
+- React Router for navigation
+- React Query for data fetching
+- Recharts for data visualization
+- Form handling with React Hook Form and Zod validation
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/66ef7f23-85be-479d-ac2e-371f5fbb238b) and start prompting.
+## Backend Features
 
-Changes made via Lovable will be committed automatically to this repo.
+- Express.js server with TypeScript
+- File upload handling
+- Integration with various AI services (Google GenAI, Hugging Face)
+- Supabase integration for data storage
+- Video processing capabilities with FFmpeg
 
-**Use your preferred IDE**
+## Prerequisites
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- Node.js (Latest LTS version recommended)
+- npm or yarn
+- FFmpeg (for video processing features)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Installation
 
-Follow these steps:
+1. Clone the repository:
+```bash
+git clone [repository-url]
+cd goalie-vision-charts
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+2. Install frontend dependencies:
+```bash
+npm install
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+3. Install backend dependencies:
+```bash
+cd backend
+npm install
+cd ..
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+## Development
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+1. Start the frontend development server:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+2. Start the backend server (in a separate terminal):
+```bash
+cd backend
+npm run dev
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+The frontend will be available at `http://localhost:5173` and the backend at `http://localhost:3000`.
 
-**Use GitHub Codespaces**
+## Building for Production
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+1. Build the frontend:
+```bash
+npm run build
+```
 
-## What technologies are used for this project?
+2. Build the backend:
+```bash
+cd backend
+npm run build
+```
 
-This project is built with:
+## Environment Variables
 
-- Vite
+Create a `.env` file in the root directory and backend directory with the following variables:
+
+Frontend `.env`:
+```
+VITE_API_URL=http://localhost:3000
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+Backend `.env`:
+```
+PORT=3000
+SUPABASE_URL=your_supabase_url
+SUPABASE_SERVICE_KEY=your_supabase_service_key
+GOOGLE_API_KEY=your_google_api_key
+HUGGINGFACE_API_KEY=your_huggingface_api_key
+```
+
+## Technologies Used
+
+### Frontend
+- React 18
 - TypeScript
-- React
-- shadcn-ui
+- Vite
 - Tailwind CSS
+- Shadcn UI
+- React Router
+- React Query
+- Recharts
+- React Hook Form
+- Zod
 
-## How can I deploy this project?
+### Backend
+- Express.js
+- TypeScript
+- FFmpeg
+- Supabase
+- Google GenAI
+- Hugging Face
 
-Simply open [Lovable](https://lovable.dev/projects/66ef7f23-85be-479d-ac2e-371f5fbb238b) and click on Share -> Publish.
+## Contributing
 
-## Can I connect a custom domain to my Lovable project?
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-Yes it is!
+## License
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This project is licensed under the MIT License - see the LICENSE file for details.
